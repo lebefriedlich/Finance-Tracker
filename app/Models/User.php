@@ -72,25 +72,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Budget::class);
     }
-
-    protected static function booted()
-    {
-        static::created(function (User $user) {
-            if ($user->role === 'user') {
-                $categories = [
-                    ['name' => 'Gaji', 'type' => 'income'],
-                    ['name' => 'Bonus', 'type' => 'income'],
-                    ['name' => 'Freelance', 'type' => 'income'],
-                    ['name' => 'Makanan', 'type' => 'expense'],
-                    ['name' => 'Transportasi', 'type' => 'expense'],
-                    ['name' => 'Internet', 'type' => 'expense'],
-                    ['name' => 'Listrik', 'type' => 'expense'],
-                    ['name' => 'Belanja', 'type' => 'expense'],
-                ];
-                foreach ($categories as $category) {
-                    $user->categories()->create($category);
-                }
-            }
-        });
-    }
 }

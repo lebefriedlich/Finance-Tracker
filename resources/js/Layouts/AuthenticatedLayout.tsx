@@ -27,11 +27,8 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                 {/* Desktop Sidebar (Matches InvoVite 308px width) */}
                 <aside className="sidebar-wrapper fixed top-0 z-30 hidden h-full w-[308px] bg-white border-r border-bgray-200 dark:border-darkblack-400 dark:bg-darkblack-600 shadow-sm xl:block">
                     <div className="sidebar-header relative z-30 flex h-[108px] w-full items-center border-b border-bgray-200 pl-[50px] dark:border-darkblack-400">
-                        <Link href={route('dashboard')} className="flex items-center gap-3">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-success-50 dark:bg-success-300/10 text-success-300">
-                                <ApplicationLogo className="h-6 w-auto fill-current" />
-                            </div>
-                            <span className="font-bold text-2xl tracking-tight text-bgray-900 dark:text-white">FinTrack</span>
+                        <Link href={route('dashboard')}>
+                            <ApplicationLogo className="w-7 h-7" />
                         </Link>
                     </div>
                     
@@ -116,11 +113,8 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                     {/* Mobile Header (80px height) */}
                     <header className="mobile-wrapper fixed block w-full z-40 xl:hidden">
                         <div className="flex h-[80px] w-full items-center justify-between bg-white border-b border-bgray-200 dark:border-darkblack-400 shadow-sm dark:bg-darkblack-600 px-4">
-                            <Link href={route('dashboard')} className="flex items-center gap-2">
-                                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-success-50 dark:bg-success-300/10 text-success-300">
-                                    <ApplicationLogo className="h-5 w-auto fill-current" />
-                                </div>
-                                <span className="font-bold text-xl tracking-tight text-bgray-900 dark:text-white">FinTrack</span>
+                            <Link href={route('dashboard')}>
+                                <ApplicationLogo className="w-6 h-6" />
                             </Link>
                             
                             <div className="flex items-center space-x-3">
