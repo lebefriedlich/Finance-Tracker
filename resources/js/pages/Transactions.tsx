@@ -114,9 +114,15 @@ export default function Transactions({ transactions, categories, filters }: any)
                         </div>
                     ) : (
                         <div className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
-                            <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
-                            <span className="text-gray-400">-</span>
-                            <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
+                            <div className="relative flex items-center">
+                                <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="px-3 py-2 border-0 bg-gray-50 dark:bg-gray-900/50 rounded-lg focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200 w-[140px]" />
+                                {!filterStart && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none">Mulai...</span>}
+                            </div>
+                            <span className="text-gray-400 font-bold">-</span>
+                            <div className="relative flex items-center">
+                                <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="px-3 py-2 border-0 bg-gray-50 dark:bg-gray-900/50 rounded-lg focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200 w-[140px]" />
+                                {!filterEnd && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none">Akhir...</span>}
+                            </div>
                             <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 ml-1"></div>
                             <button onClick={applyDateFilter} className="px-4 py-2 ml-1 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors shadow-sm">
                                 Terapkan

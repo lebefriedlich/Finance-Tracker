@@ -35,7 +35,10 @@ export default function Login({
             {/* Theme Toggle Button */}
             <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-50">
                 <button
-                    onClick={() => document.documentElement.classList.toggle('dark')}
+                    onClick={() => {
+                        const isDark = document.documentElement.classList.toggle('dark');
+                        localStorage.theme = isDark ? 'dark' : 'light';
+                    }}
                     className="p-2 rounded-full bg-bgray-100 hover:bg-bgray-200 dark:bg-darkblack-500 dark:hover:bg-darkblack-400 transition-colors flex items-center justify-center shadow-sm border border-bgray-200 dark:border-darkblack-400"
                 >
                     <svg className="w-5 h-5 text-bgray-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

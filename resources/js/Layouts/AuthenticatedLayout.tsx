@@ -7,7 +7,10 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
     const user = usePage().props.auth.user;
     const [profileOpen, setProfileOpen] = useState(false);
     
-    const toggleDark = () => document.documentElement.classList.toggle('dark');
+    const toggleDark = () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.theme = isDark ? 'dark' : 'light';
+    };
 
     const navs = user.role === 'owner'
         ? [
