@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:user'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+        Route::get('/transactions/export', [\App\Http\Controllers\TransactionController::class, 'export'])->name('transactions.export');
         Route::resource('transactions', \App\Http\Controllers\TransactionController::class);
         Route::resource('budgets', \App\Http\Controllers\BudgetController::class);
     });

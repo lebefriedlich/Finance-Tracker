@@ -6,18 +6,23 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    use \App\Traits\DateRangeFilter;
+
     public function index(Request $request)
     {
         $user = $request->user();
+        [$startDate, $endDate] = $this->getDateRange($request);
         $month = $request->input('month', date('Y-m'));
 
         $lifetimeIncome = $user->transactions()->where('type', 'income')->sum('amount');
         $lifetimeExpense = $user->transactions()->where('type', 'expense')->sum('amount');
         $totalBalance = $lifetimeIncome - $lifetimeExpense;
 
-        $monthlyTransactions = $user->transactions()
-            ->where('date', 'like', $month . '%')
-            ->get();
+        $query = $user->transactions();
+        if ($startDate) $query->whereDate('date', '>=', $startDate);
+        if ($endDate) $query->whereDate('date', '<=', $endDate);
+        
+        $monthlyTransactions = $query->get();
 
         $monthlyIncome = $monthlyTransactions->where('type', 'income')->sum('amount');
         $monthlyExpense = $monthlyTransactions->where('type', 'expense')->sum('amount');
@@ -64,7 +69,11 @@ class DashboardController extends Controller
             'budgetProgress' => $budgetProgress,
             'expenseChart' => $expenseChart,
             'recentTransactions' => $recentTransactions,
-            'filters' => ['month' => $month]
+            'filters' => [
+                'month' => $month,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date')
+            ]
         ]);
     }
 }

@@ -17,6 +17,7 @@ export default function UpdateProfileInformation({
         useForm({
             name: user.name,
             email: user.email,
+            cycle_start_date: user.cycle_start_date || 1,
         });
 
     const submit: FormEventHandler = (e) => {
@@ -66,6 +67,23 @@ export default function UpdateProfileInformation({
                     />
 
                     {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
+                </div>
+
+                <div>
+                    <label htmlFor="cycle_start_date" className="block text-sm font-semibold mb-2 dark:text-gray-200">Tanggal Mulai Siklus (1 - 31)</label>
+                    <p className="text-xs text-gray-500 mb-2">Tanggal mulai perhitungan laporan bulanan. (Default: 1)</p>
+                    <input
+                        id="cycle_start_date"
+                        type="number"
+                        min="1"
+                        max="31"
+                        className="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3 min-h-[50px]"
+                        value={data.cycle_start_date}
+                        onChange={(e) => setData('cycle_start_date', parseInt(e.target.value))}
+                        required
+                    />
+
+                    {errors.cycle_start_date && <p className="text-red-500 text-xs mt-1 font-medium">{errors.cycle_start_date}</p>}
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

@@ -27,3 +27,7 @@
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+html.dark {
+  color-scheme: dark;
+}

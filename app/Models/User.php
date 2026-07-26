@@ -32,6 +32,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'cycle_start_date',
     ];
 
     /**

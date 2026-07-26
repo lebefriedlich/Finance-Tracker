@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, TrendingUp, TrendingDown, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Dashboard({ stats, budgetProgress, expenseChart, recentTransactions, filters }: any) {
     const { user } = usePage().props.auth;
@@ -10,15 +11,56 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
 
     const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
+    const [filterStart, setFilterStart] = useState(filters.start_date || '');
+    const [filterEnd, setFilterEnd] = useState(filters.end_date || '');
+    const [showCustomDate, setShowCustomDate] = useState(!!filters.start_date || !!filters.end_date);
+
+    const applyDateFilter = () => {
+        router.get(route('dashboard'), {
+            month: filters.month,
+            start_date: filterStart,
+            end_date: filterEnd,
+        }, { preserveState: true });
+    };
+
+    const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        router.get(route('dashboard'), { month: e.target.value, start_date: '', end_date: '' }, { preserveState: true });
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
             
             <div className="pb-10">
-                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-3xl font-bold text-bgray-900 dark:text-white">Selamat datang kembali, {user.name}!</h2>
-                        <p className="text-bgray-500 mt-1">Inilah ringkasan keuangan Anda bulan ini.</p>
+                        <p className="text-bgray-500 mt-1">Inilah ringkasan keuangan Anda.</p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        {!showCustomDate ? (
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
+                                <input type="month" value={filters.month} onChange={handleMonthChange} className="px-4 py-2 border-0 bg-transparent focus:ring-0 text-sm font-bold text-gray-700 dark:text-gray-200" />
+                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700"></div>
+                                <button onClick={() => setShowCustomDate(true)} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+                                    Filter Khusus
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
+                                <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
+                                <span className="text-gray-400">-</span>
+                                <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
+                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 ml-1"></div>
+                                <button onClick={applyDateFilter} className="px-4 py-2 ml-1 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors shadow-sm">
+                                    Terapkan
+                                </button>
+                                <button onClick={() => { setShowCustomDate(false); handleMonthChange({target:{value: filters.month}} as any); }} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+                                    Batal
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

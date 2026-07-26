@@ -70,20 +70,69 @@ export default function Transactions({ transactions, categories, filters }: any)
         }
     };
 
+    const [filterStart, setFilterStart] = useState(filters.start_date || '');
+    const [filterEnd, setFilterEnd] = useState(filters.end_date || '');
+
+    const applyDateFilter = () => {
+        router.get(route('transactions.index'), {
+            month: filters.month,
+            start_date: filterStart,
+            end_date: filterEnd,
+        }, { preserveState: true });
+    };
+
+    const handleExport = () => {
+        const params = new URLSearchParams();
+        if (filters.start_date) params.append('start_date', filters.start_date);
+        if (filters.end_date) params.append('end_date', filters.end_date);
+        if (!filters.start_date && !filters.end_date && filters.month) params.append('month', filters.month);
+        
+        window.location.href = route('transactions.export') + '?' + params.toString();
+    };
+
     const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        router.get(route('transactions.index'), { month: e.target.value }, { preserveState: true });
+        router.get(route('transactions.index'), { month: e.target.value, start_date: '', end_date: '' }, { preserveState: true });
     };
 
     const filteredCategories = (categories || []).filter((c: any) => c.type === data.type);
+
+    const [showCustomDate, setShowCustomDate] = useState(!!filters.start_date || !!filters.end_date);
 
     return (
         <AuthenticatedLayout header="Keuangan">
             <Head title="Keuangan" />
 
-            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto ml-auto">
-                    <input type="month" value={filters.month} onChange={handleMonthChange} className="px-4 py-2.5 min-h-[44px] rounded-xl border-gray-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-800/80 dark:border-gray-700/50 dark:text-white backdrop-blur-sm font-semibold text-sm" />
-                    <button onClick={openCreateModal} className="flex items-center gap-2 bg-gray-900 dark:bg-emerald-500 text-white dark:text-gray-900 px-5 py-2.5 rounded-full hover:bg-gray-800 dark:hover:bg-emerald-400 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    {!showCustomDate ? (
+                        <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
+                            <input type="month" value={filters.month} onChange={handleMonthChange} className="px-4 py-2 border-0 bg-transparent focus:ring-0 text-sm font-bold text-gray-700 dark:text-gray-200" />
+                            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700"></div>
+                            <button onClick={() => setShowCustomDate(true)} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+                                Filter Khusus
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
+                            <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
+                            <span className="text-gray-400">-</span>
+                            <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="px-3 py-2 border-0 bg-transparent focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200" />
+                            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 ml-1"></div>
+                            <button onClick={applyDateFilter} className="px-4 py-2 ml-1 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors shadow-sm">
+                                Terapkan
+                            </button>
+                            <button onClick={() => { setShowCustomDate(false); handleMonthChange({target:{value: filters.month}} as any); }} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+                                Batal
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
+                    <button onClick={handleExport} className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-full hover:bg-emerald-700 font-semibold shadow-md transition-all">
+                        Export Excel
+                    </button>
+                    <button onClick={openCreateModal} className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gray-900 dark:bg-emerald-500 text-white dark:text-gray-900 px-5 py-2.5 rounded-full hover:bg-gray-800 dark:hover:bg-emerald-400 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                         <Plus className="w-4 h-4" /> Tambah
                     </button>
                 </div>

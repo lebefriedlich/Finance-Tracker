@@ -9,22 +9,42 @@ use App\Http\Requests\UpdateTransactionRequest;
 
 class TransactionController extends Controller
 {
+    use \App\Traits\DateRangeFilter;
+
     public function index(Request $request)
     {
-        $month = $request->input('month', date('Y-m'));
-        $transactions = auth()->user()->transactions()
-            ->with('category')
-            ->where('date', 'like', $month . '%')
-            ->orderBy('date', 'desc')
-            ->paginate(15);
+        [$startDate, $endDate] = $this->getDateRange($request);
+        
+        $query = auth()->user()->transactions()->with('category');
+        
+        if ($startDate) $query->whereDate('date', '>=', $startDate);
+        if ($endDate) $query->whereDate('date', '<=', $endDate);
+
+        $transactions = $query->orderBy('date', 'desc')->paginate(15);
 
         $categories = auth()->user()->categories()->get();
 
         return inertia('Transactions', [
             'transactions' => $transactions,
             'categories' => $categories,
-            'filters' => ['month' => $month]
+            'filters' => [
+                'month' => $request->input('month', date('Y-m')),
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date')
+            ]
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        [$startDate, $endDate] = $this->getDateRange($request);
+
+        $filename = 'Transaksi_' . $startDate->format('Y-m-d') . '_sd_' . $endDate->format('Y-m-d') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TransactionsExport($startDate, $endDate),
+            $filename
+        );
     }
 
     public function store(Request $request)
