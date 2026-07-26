@@ -23,7 +23,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                    {/* Stats Cards modeled perfectly after InvoVite's x-stats-card */}
+                    {/* Stats Cards modeled perfectly after x-stats-card */}
                     
                     <div className="rounded-2xl bg-white p-6 dark:bg-darkblack-600 shadow-md border border-bgray-100 dark:border-darkblack-400">
                         <div className="flex items-center justify-between mb-4">
@@ -75,7 +75,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-                    {/* Budget Progress (Mimicking InvoVite's Event Status) */}
+                    {/* Budget Progress (Mimicking Event Status) */}
                     <div className="rounded-2xl bg-white dark:bg-darkblack-600 p-8 shadow-md border border-bgray-100 dark:border-darkblack-400">
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                             <h4 className="text-lg font-bold text-bgray-900 dark:text-white">Progres Anggaran</h4>
@@ -136,7 +136,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                     </div>
                 </div>
 
-                {/* Recent Transactions (Mimicking InvoVite's Recent Checkins) */}
+                {/* Recent Transactions (Mimicking Recent Checkins) */}
                 <div className="rounded-2xl bg-white dark:bg-darkblack-600 p-8 shadow-md border border-bgray-100 dark:border-darkblack-400 mb-10">
                     <div className="flex items-center justify-between mb-6">
                         <h4 className="text-lg font-bold text-bgray-900 dark:text-white">Transaksi Terbaru</h4>

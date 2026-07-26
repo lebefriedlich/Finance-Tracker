@@ -11,14 +11,13 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        // ponytail: simple pagination, eager load category
         $month = $request->input('month', date('Y-m'));
         $transactions = auth()->user()->transactions()
             ->with('category')
             ->where('date', 'like', $month . '%')
             ->orderBy('date', 'desc')
             ->paginate(15);
-            
+
         $categories = auth()->user()->categories()->get();
 
         return inertia('Transactions', [
@@ -37,7 +36,7 @@ class TransactionController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string',
         ]);
-        
+
         // Ensure category belongs to user
         $category = auth()->user()->categories()->findOrFail($validated['category_id']);
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
@@ -56,7 +55,7 @@ class TransactionController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string',
         ]);
-        
+
         $category = auth()->user()->categories()->findOrFail($validated['category_id']);
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
 

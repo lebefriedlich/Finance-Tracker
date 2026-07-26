@@ -46,7 +46,7 @@ export default function Login({
 
             <div className="flex flex-col lg:flex-row justify-between min-h-screen">
                 {/* Left Form Side */}
-                <div className="lg:w-1/2 px-5 xl:pl-12 pt-10 flex flex-col justify-center items-center text-left">
+                <div className="flex-1 lg:w-1/2 px-5 xl:pl-12 py-10 flex flex-col justify-center items-center text-left">
                     <div className="w-full max-w-[450px]">
                         <header className="mb-10 text-center">
                             <h2 className="text-bgray-900 dark:text-white text-4xl font-bold mb-2 text-center">Selamat Datang Di FinTrack</h2>

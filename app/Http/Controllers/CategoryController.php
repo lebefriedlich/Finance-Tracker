@@ -39,7 +39,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $this->authorize('delete', $category);
-        // ponytail: prevent deletion if active transactions exist (lazy DB exception handling or check)
+
         if ($category->transactions()->exists()) {
             return redirect()->back()->withErrors(['message' => 'Cannot delete category with active transactions.']);
         }

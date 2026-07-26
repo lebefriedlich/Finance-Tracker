@@ -24,10 +24,10 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         <div className="layout-wrapper active w-full bg-bgray-50 dark:bg-darkblack-500 font-sans text-bgray-900 dark:text-white">
             <div className="relative flex w-full">
                 
-                {/* Desktop Sidebar (Matches InvoVite 308px width) */}
+                {/* Desktop Sidebar (Matches 308px width) */}
                 <aside className="sidebar-wrapper fixed top-0 z-30 hidden h-full w-[308px] bg-white border-r border-bgray-200 dark:border-darkblack-400 dark:bg-darkblack-600 shadow-sm xl:block">
                     <div className="sidebar-header relative z-30 flex h-[108px] w-full items-center border-b border-bgray-200 pl-[50px] dark:border-darkblack-400">
-                        <Link href={route('dashboard')}>
+                        <Link href={user.role === 'owner' ? route('admin.users.index') : route('dashboard')}>
                             <ApplicationLogo className="w-7 h-7" />
                         </Link>
                     </div>
@@ -62,7 +62,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                 {/* Main Body Wrapper */}
                 <div className="body-wrapper flex-1 overflow-x-hidden min-h-screen dark:bg-darkblack-500 xl:ml-[308px]">
                     
-                    {/* Desktop Topbar (Matches InvoVite 108px height) */}
+                    {/* Desktop Topbar (Matches 108px height) */}
                     <header className="header-wrapper fixed z-30 hidden w-full xl:block" style={{ width: 'calc(100% - 308px)' }}>
                         <div className="relative flex h-[108px] w-full items-center justify-between bg-white border-b border-bgray-200 dark:border-darkblack-400 px-10 dark:bg-darkblack-600 shadow-sm 2xl:px-[76px]">
                             <div className="text-xl font-bold text-bgray-900 dark:text-white">
@@ -113,7 +113,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                     {/* Mobile Header (80px height) */}
                     <header className="mobile-wrapper fixed block w-full z-40 xl:hidden">
                         <div className="flex h-[80px] w-full items-center justify-between bg-white border-b border-bgray-200 dark:border-darkblack-400 shadow-sm dark:bg-darkblack-600 px-4">
-                            <Link href={route('dashboard')}>
+                            <Link href={user.role === 'owner' ? route('admin.users.index') : route('dashboard')}>
                                 <ApplicationLogo className="w-6 h-6" />
                             </Link>
                             
@@ -139,7 +139,10 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                                                 <div className="px-5 py-3 border-b border-bgray-200 dark:border-darkblack-400">
                                                     <p className="text-base font-bold text-bgray-900 dark:text-white truncate">{user.name}</p>
                                                 </div>
-                                                <Link href={route('logout')} method="post" as="button" className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm font-medium text-rose-500 hover:bg-bgray-50 dark:hover:bg-darkblack-500">
+                                                <Link href={route('profile.edit')} className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-bgray-700 hover:bg-bgray-100 dark:text-white dark:hover:bg-darkblack-500 transition-colors">
+                                                    <UserIcon className="w-4 h-4" /> Edit Profil
+                                                </Link>
+                                                <Link href={route('logout')} method="post" as="button" className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm font-medium text-rose-500 hover:bg-bgray-50 dark:hover:bg-darkblack-500 transition-colors">
                                                     <LogOut className="w-4 h-4" /> Keluar
                                                 </Link>
                                             </div>
@@ -150,8 +153,8 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         </div>
                     </header>
 
-                    {/* Main Content Area (Matches InvoVite pt-100px/156px and px-6/px-12 padding) */}
-                    <main className="w-full px-6 pb-6 pt-[100px] xl:pt-[140px] xl:px-12 xl:pb-12">
+                    {/* Main Content Area (Matches pt-100px/156px and px-6/px-12 padding) */}
+                    <main className="w-full px-6 pb-[100px] pt-[100px] xl:pt-[140px] xl:px-12 xl:pb-12">
                         {children}
                     </main>
 
@@ -167,12 +170,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         ))}
                     </div>
 
-                    {/* Mobile FAB */}
-                    {user.role === 'user' && (
-                        <Link href={route('transactions.index')} className="xl:hidden fixed bottom-20 right-4 bg-success-300 text-white p-4 rounded-full shadow-lg shadow-success-300/30 hover:bg-success-400 active:scale-95 transition-all duration-200 z-50">
-                            <Plus className="w-6 h-6 stroke-[2.5px]" />
-                        </Link>
-                    )}
+
                 </div>
             </div>
         </div>
