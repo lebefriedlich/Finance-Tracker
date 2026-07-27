@@ -5,7 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 
 export default function Login({
     status,
@@ -19,6 +19,13 @@ export default function Login({
         password: '',
         remember: false as boolean,
     });
+
+    useEffect(() => {
+        // Auto-check "Remember Me" if running as a PWA (standalone mode)
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            setData('remember', true);
+        }
+    }, []);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -83,6 +90,18 @@ export default function Login({
                                     required 
                                 />
                                 {errors.password && <span className="text-rose-500 text-sm mt-1 block">{errors.password}</span>}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.remember}
+                                        onChange={(e) => setData('remember', e.target.checked)}
+                                        className="rounded border-bgray-300 dark:border-darkblack-400 text-success-300 focus:ring-success-300 dark:bg-darkblack-500 w-5 h-5"
+                                    />
+                                    <span className="text-sm font-medium text-bgray-700 dark:text-bgray-300">Ingat Saya</span>
+                                </label>
                             </div>
 
                             <button 
