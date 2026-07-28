@@ -31,7 +31,7 @@ export default function Transactions({ transactions, categories, filters }: any)
         clearErrors();
         setData({
             category_id: tx.category_id,
-            date: tx.date,
+            date: tx.date ? String(tx.date).split('T')[0] : '',
             type: tx.type,
             amount: tx.amount,
             description: tx.description || '',

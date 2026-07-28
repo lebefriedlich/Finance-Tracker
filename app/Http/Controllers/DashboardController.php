@@ -35,14 +35,22 @@ class DashboardController extends Controller
         $budgetProgress = $user->categories()->where('type', 'expense')->get()->map(function ($cat) use ($budgets, $categoryExpenses) {
             $budgetAmount = $budgets->has($cat->id) ? $budgets[$cat->id]->amount : 0;
             $spentAmount = $categoryExpenses->has($cat->id) ? $categoryExpenses[$cat->id]->sum('amount') : 0;
+            
+            $status = 'ok';
+            if ($budgetAmount == 0) $status = 'nobudget';
+            elseif ($spentAmount > $budgetAmount) $status = 'over';
+            elseif ($spentAmount >= 0.8 * $budgetAmount) $status = 'warning';
+
             return [
                 'id' => $cat->id,
                 'name' => $cat->name,
                 'budget' => $budgetAmount,
                 'spent' => $spentAmount,
-                'status' => $spentAmount > $budgetAmount && $budgetAmount > 0 ? 'over' : 'ok',
+                'status' => $status,
             ];
-        });
+        })->filter(function ($bp) {
+            return $bp['budget'] > 0 || $bp['spent'] > 0;
+        })->values();
 
         // Expense distribution
         $expenseChart = $categoryExpenses->map(function ($transactions, $catId) use ($user) {

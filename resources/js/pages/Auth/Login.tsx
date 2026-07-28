@@ -5,7 +5,8 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler, useEffect } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login({
     status,
@@ -19,6 +20,8 @@ export default function Login({
         password: '',
         remember: false as boolean,
     });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         // Auto-check "Remember Me" if running as a PWA (standalone mode)
@@ -81,14 +84,23 @@ export default function Login({
 
                             <div>
                                 <label className="block font-bold text-bgray-900 dark:text-white mb-2 text-left">Kata Sandi</label>
-                                <input 
-                                    type="password" 
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
-                                    className="text-bgray-800 text-lg border border-bgray-300 dark:border-darkblack-400 dark:bg-darkblack-500 dark:text-white h-14 w-full focus:border-success-300 focus:ring-1 focus:ring-success-300 rounded-lg px-4 py-3.5 placeholder:text-bgray-500"
-                                    placeholder="••••••••" 
-                                    required 
-                                />
+                                <div className="relative">
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
+                                        className="text-bgray-800 text-lg border border-bgray-300 dark:border-darkblack-400 dark:bg-darkblack-500 dark:text-white h-14 w-full focus:border-success-300 focus:ring-1 focus:ring-success-300 rounded-lg px-4 py-3.5 pr-12 placeholder:text-bgray-500"
+                                        placeholder="••••••••" 
+                                        required 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-bgray-500 hover:text-bgray-700 dark:text-bgray-400 dark:hover:text-bgray-200 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                                 {errors.password && <span className="text-rose-500 text-sm mt-1 block">{errors.password}</span>}
                             </div>
 

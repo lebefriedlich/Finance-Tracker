@@ -137,12 +137,16 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                                     <div key={bp.id}>
                                         <div className="flex items-center justify-between mb-2">
                                             <p className="font-bold text-bgray-900 dark:text-white text-sm truncate pr-2">{bp.name}</p>
-                                            <span className={`whitespace-nowrap px-2 py-1 rounded text-[10px] font-bold uppercase ${bp.status === 'over' ? 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400' : 'bg-success-50 text-success-500 dark:bg-success-500/10 dark:text-success-400'}`}>
-                                                {bp.status === 'over' ? 'Melebihi Anggaran' : 'Aman'}
+                                            <span className={`whitespace-nowrap px-2 py-1 rounded text-[10px] font-bold uppercase 
+                                                ${bp.status === 'over' ? 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400' : 
+                                                  bp.status === 'warning' ? 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400' :
+                                                  bp.status === 'nobudget' ? 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' :
+                                                  'bg-success-50 text-success-500 dark:bg-success-500/10 dark:text-success-400'}`}>
+                                                {bp.status === 'over' ? 'Bocor' : bp.status === 'warning' ? 'Hampir Habis' : bp.status === 'nobudget' ? 'Tanpa Anggaran' : 'Aman'}
                                             </span>
                                         </div>
                                         <div className="w-full bg-bgray-100 dark:bg-darkblack-500 rounded-full h-1.5">
-                                            <div className={`${bp.status === 'over' ? 'bg-rose-500' : 'bg-success-300'} h-1.5 rounded-full`} style={{ width: `${pct}%` }}></div>
+                                            <div className={`${bp.status === 'over' ? 'bg-rose-500' : bp.status === 'warning' ? 'bg-orange-500' : bp.status === 'nobudget' ? 'bg-gray-400' : 'bg-success-300'} h-1.5 rounded-full`} style={{ width: `${pct}%` }}></div>
                                         </div>
                                         <div className="flex justify-between mt-1">
                                             <p className="text-[10px] text-bgray-500">{pct.toFixed(1)}% Terpakai</p>
