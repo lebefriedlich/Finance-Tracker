@@ -39,6 +39,7 @@ class DashboardController extends Controller
             $status = 'ok';
             if ($budgetAmount == 0) $status = 'nobudget';
             elseif ($spentAmount > $budgetAmount) $status = 'over';
+            elseif ($spentAmount == $budgetAmount) $status = 'empty';
             elseif ($spentAmount >= 0.8 * $budgetAmount) $status = 'warning';
 
             return [
