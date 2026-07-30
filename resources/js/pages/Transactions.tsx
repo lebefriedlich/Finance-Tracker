@@ -74,20 +74,8 @@ export default function Transactions({ transactions, categories, filters }: any)
     const [filterEnd, setFilterEnd] = useState(filters.end_date || '');
 
     const applyDateFilter = () => {
-        router.get(route('transactions.index'), {
-            month: filters.month,
-            start_date: filterStart,
-            end_date: filterEnd,
-        }, { preserveState: true });
-    };
-
-    const handleExport = () => {
-        const params = new URLSearchParams();
-        if (filters.start_date) params.append('start_date', filters.start_date);
-        if (filters.end_date) params.append('end_date', filters.end_date);
-        if (!filters.start_date && !filters.end_date && filters.month) params.append('month', filters.month);
-        
-        window.location.href = route('transactions.export') + '?' + params.toString();
+        if (!filterStart || !filterEnd) return;
+        router.get(route('transactions.index'), { start_date: filterStart, end_date: filterEnd }, { preserveState: true });
     };
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,9 +123,6 @@ export default function Transactions({ transactions, categories, filters }: any)
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
-                    <button onClick={handleExport} className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-full hover:bg-emerald-700 font-semibold shadow-md transition-all">
-                        Export Excel
-                    </button>
                     <button onClick={openCreateModal} className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gray-900 dark:bg-emerald-500 text-white dark:text-gray-900 px-5 py-2.5 rounded-full hover:bg-gray-800 dark:hover:bg-emerald-400 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                         <Plus className="w-4 h-4" /> Tambah
                     </button>

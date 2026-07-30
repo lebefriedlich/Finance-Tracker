@@ -8,7 +8,7 @@ class DashboardController extends Controller
 {
     use \App\Traits\DateRangeFilter;
 
-    public function index(Request $request)
+    private function getDashboardData(Request $request)
     {
         $user = $request->user();
         [$startDate, $endDate] = $this->getDateRange($request);
@@ -68,21 +68,44 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return inertia('Dashboard', [
-            'stats' => [
-                'totalBalance' => $totalBalance,
-                'monthlyIncome' => $monthlyIncome,
-                'monthlyExpense' => $monthlyExpense,
-                'monthlyCashflow' => $monthlyCashflow,
-            ],
-            'budgetProgress' => $budgetProgress,
-            'expenseChart' => $expenseChart,
-            'recentTransactions' => $recentTransactions,
+        return compact(
+            'startDate', 'endDate', 'month', 'totalBalance', 'monthlyIncome', 'monthlyExpense',
+            'monthlyCashflow', 'budgetProgress', 'expenseChart', 'recentTransactions'
+        );
+    }
+
+    public function index(Request $request)
+    {
+        $data = $this->getDashboardData($request);
+        
+        return inertia('Dashboard', array_merge($data, [
             'filters' => [
-                'month' => $month,
+                'month' => $data['month'],
                 'start_date' => $request->input('start_date'),
-                'end_date' => $request->input('end_date')
+                'end_date' => $request->input('end_date'),
             ]
-        ]);
+        ]));
+    }
+
+    public function export(Request $request)
+    {
+        $data = $this->getDashboardData($request);
+        
+        $startStr = $data['startDate'] ? $data['startDate']->format('Y-m-d') : 'AllTime';
+        $endStr = $data['endDate'] ? $data['endDate']->format('Y-m-d') : 'AllTime';
+        
+        $fileName = 'Laporan_Dashboard_' . $startStr . '_sd_' . $endStr . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\DashboardExport(
+                $data['startDate'],
+                $data['endDate'],
+                $data['budgetProgress'],
+                $data['totalBalance'],
+                $data['monthlyIncome'],
+                $data['monthlyExpense']
+            ),
+            $fileName
+        );
     }
 }

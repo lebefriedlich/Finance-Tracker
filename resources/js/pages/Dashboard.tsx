@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage, router } from '@inertiajs/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Wallet, TrendingUp, TrendingDown, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, Activity, ArrowUpRight, ArrowDownRight, Download } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Dashboard({ stats, budgetProgress, expenseChart, recentTransactions, filters }: any) {
+export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense, monthlyCashflow, budgetProgress, expenseChart, recentTransactions, filters }: any) {
     const { user } = usePage().props.auth;
     const formatRp = (num: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
     const formatDate = (dateStr: string) => new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(dateStr));
@@ -25,6 +25,17 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         router.get(route('dashboard'), { month: e.target.value, start_date: '', end_date: '' }, { preserveState: true });
+    };
+
+    const handleExport = () => {
+        const params = new URLSearchParams();
+        if (showCustomDate && filterStart && filterEnd) {
+            params.append('start_date', filterStart);
+            params.append('end_date', filterEnd);
+        } else {
+            params.append('month', filters.month);
+        }
+        window.location.href = `${route('dashboard.export')}?${params.toString()}`;
     };
 
     return (
@@ -51,12 +62,12 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                             <div className="flex flex-wrap items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
                                 <div className="relative flex items-center">
                                     <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="px-3 py-2 border-0 bg-gray-50 dark:bg-gray-900/50 rounded-lg focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200 w-[140px]" />
-                                    {!filterStart && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none">Mulai...</span>}
+                                    {!filterStart && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none md:hidden">Mulai...</span>}
                                 </div>
                                 <span className="text-gray-400 font-bold">-</span>
                                 <div className="relative flex items-center">
                                     <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="px-3 py-2 border-0 bg-gray-50 dark:bg-gray-900/50 rounded-lg focus:ring-0 text-sm font-semibold text-gray-700 dark:text-gray-200 w-[140px]" />
-                                    {!filterEnd && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none">Akhir...</span>}
+                                    {!filterEnd && <span className="absolute left-3 text-sm font-medium text-gray-400 pointer-events-none md:hidden">Akhir...</span>}
                                 </div>
                                 <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 ml-1"></div>
                                 <button onClick={applyDateFilter} className="px-4 py-2 ml-1 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors shadow-sm">
@@ -67,6 +78,10 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                                 </button>
                             </div>
                         )}
+                        <button onClick={handleExport} className="flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-xl font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                            <Download className="w-4 h-4" />
+                            Ekspor Laporan
+                        </button>
                     </div>
                 </div>
 
@@ -81,7 +96,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                             <span className="text-xs font-bold text-bgray-500 uppercase tracking-wider">Total Saldo</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(stats.totalBalance)}</h3>
+                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(totalBalance)}</h3>
                         </div>
                     </div>
                     
@@ -93,7 +108,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                             <span className="text-xs font-bold text-bgray-500 uppercase tracking-wider">Pemasukan</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(stats.monthlyIncome)}</h3>
+                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(monthlyIncome)}</h3>
                         </div>
                     </div>
 
@@ -105,7 +120,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                             <span className="text-xs font-bold text-bgray-500 uppercase tracking-wider">Pengeluaran</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(stats.monthlyExpense)}</h3>
+                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(monthlyExpense)}</h3>
                         </div>
                     </div>
 
@@ -117,7 +132,7 @@ export default function Dashboard({ stats, budgetProgress, expenseChart, recentT
                             <span className="text-xs font-bold text-bgray-500 uppercase tracking-wider">Arus Kas</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(stats.monthlyCashflow)}</h3>
+                            <h3 className="text-3xl font-bold text-bgray-900 dark:text-white leading-none">{formatRp(monthlyCashflow)}</h3>
                         </div>
                     </div>
                 </div>

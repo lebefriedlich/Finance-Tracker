@@ -10,7 +10,9 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+use Maatwebsite\Excel\Concerns\WithTitle;
+
+class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
     protected $startDate;
     protected $endDate;
@@ -62,5 +64,10 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
         return [
             1 => ['font' => ['bold' => true]],
         ];
+    }
+
+    public function title(): string
+    {
+        return 'Transaksi';
     }
 }
