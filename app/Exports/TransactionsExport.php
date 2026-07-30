@@ -10,9 +10,13 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
+class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle, WithColumnFormatting
 {
     protected $startDate;
     protected $endDate;
@@ -59,8 +63,36 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
         ];
     }
 
+    public function columnFormats(): array
+    {
+        return [
+            'D' => '#,##0',
+        ];
+    }
+
     public function styles(Worksheet $sheet)
     {
+        $rowCount = $sheet->getHighestRow();
+        
+        $sheet->getStyle('A1:E1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['argb' => 'FF10B981'],
+            ],
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFDDDDDD']],
+            ],
+        ]);
+
+        if ($rowCount > 1) {
+            $sheet->getStyle('A2:E' . $rowCount)->applyFromArray([
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFDDDDDD']],
+                ],
+            ]);
+        }
+
         return [
             1 => ['font' => ['bold' => true]],
         ];
