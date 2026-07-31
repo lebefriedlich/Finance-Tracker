@@ -2,9 +2,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { Plus, X, Trash2, Tags } from 'lucide-react';
+import { Plus, X, Trash2, Tags, Search } from 'lucide-react';
 
-export default function Categories({ categories }: any) {
+export default function Categories({ categories, filters = {} }: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     
@@ -38,6 +38,12 @@ export default function Categories({ categories }: any) {
             <Head title="Kategori" />
 
             <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-w-4xl mx-auto">
+                <div className="relative group w-full sm:w-72">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <Search className="w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                    </div>
+                    <input type="text" placeholder="Cari kategori..." defaultValue={filters.search} onKeyDown={e => e.key === 'Enter' && router.get(route('categories.index'), { search: e.currentTarget.value }, { preserveState: true })} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
+                </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto ml-auto">
                     <button onClick={() => setIsOpen(true)} className="flex items-center gap-2 bg-gray-900 dark:bg-emerald-500 text-white dark:text-gray-900 px-5 py-2.5 rounded-full hover:bg-gray-800 dark:hover:bg-emerald-400 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                         <Plus className="w-4 h-4" /> Tambah Kategori

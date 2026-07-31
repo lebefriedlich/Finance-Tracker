@@ -9,10 +9,17 @@ use App\Http\Requests\UpdateCategoryRequest;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = auth()->user()->categories()->orderBy('name')->get();
-        return inertia('Categories', ['categories' => $categories]);
+        $query = auth()->user()->categories()->orderBy('name');
+        if ($search = $request->input('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        $categories = $query->get();
+        return inertia('Categories', [
+            'categories' => $categories,
+            'filters' => ['search' => $search]
+        ]);
     }
 
     public function store(Request $request)

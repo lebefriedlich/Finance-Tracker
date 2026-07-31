@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { Plus, X, Trash2, Receipt, Edit2 } from 'lucide-react';
+import { Plus, X, Trash2, Receipt, Edit2, Search } from 'lucide-react';
 
 export default function Transactions({ transactions, categories, filters }: any) {
     const [isOpen, setIsOpen] = useState(false);
@@ -91,7 +91,13 @@ export default function Transactions({ transactions, categories, filters }: any)
             <Head title="Keuangan" />
 
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                    <div className="relative group w-full sm:w-64">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                            <Search className="w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                        </div>
+                        <input type="text" placeholder="Cari transaksi..." defaultValue={filters.search} onKeyDown={e => e.key === 'Enter' && router.get(route('transactions.index'), { ...filters, search: e.currentTarget.value }, { preserveState: true })} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
+                    </div>
                     {!showCustomDate ? (
                         <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
                             <input type="month" value={filters.month} onChange={handleMonthChange} className="px-4 py-2 border-0 bg-transparent focus:ring-0 text-sm font-bold text-gray-700 dark:text-gray-200" />

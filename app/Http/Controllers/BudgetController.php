@@ -12,14 +12,23 @@ class BudgetController extends Controller
     public function index(Request $request)
     {
         $month = $request->input('month', date('Y-m'));
-        $budgets = auth()->user()->budgets()->with('category')->where('month', $month)->get();
+        $query = auth()->user()->budgets()->with('category')->where('month', $month);
+        if ($search = $request->input('search')) {
+            $query->whereHas('category', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+        $budgets = $query->get();
         // Only expense categories can have budgets
         $categories = auth()->user()->categories()->where('type', 'expense')->get();
 
         return inertia('Budgets', [
             'budgets' => $budgets,
             'categories' => $categories,
-            'filters' => ['month' => $month]
+            'filters' => [
+                'month' => $month,
+                'search' => $search
+            ]
         ]);
     }
 

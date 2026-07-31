@@ -20,7 +20,16 @@ class TransactionController extends Controller
         if ($startDate) $query->whereDate('date', '>=', $startDate);
         if ($endDate) $query->whereDate('date', '<=', $endDate);
 
-        $transactions = $query->orderBy('date', 'desc')->paginate(15);
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhereHas('category', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->paginate(15)->withQueryString();
 
         $categories = auth()->user()->categories()->get();
 
@@ -30,7 +39,8 @@ class TransactionController extends Controller
             'filters' => [
                 'month' => $request->input('month', date('Y-m')),
                 'start_date' => $request->input('start_date'),
-                'end_date' => $request->input('end_date')
+                'end_date' => $request->input('end_date'),
+                'search' => $search
             ]
         ]);
     }

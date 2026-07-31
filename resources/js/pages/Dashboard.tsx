@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, TrendingUp, TrendingDown, Activity, ArrowUpRight, ArrowDownRight, Download } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense, monthlyCashflow, budgetProgress, expenseChart, recentTransactions, filters }: any) {
+export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense, monthlyCashflow, budgetProgress, expenseChart, recentTransactions, filters, endDate }: any) {
     const { user } = usePage().props.auth;
     const formatRp = (num: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
     const formatDate = (dateStr: string) => new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(dateStr));
@@ -142,7 +142,10 @@ export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense,
                     <div className="rounded-2xl bg-white dark:bg-darkblack-600 p-8 shadow-md border border-bgray-100 dark:border-darkblack-400">
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                             <h4 className="text-lg font-bold text-bgray-900 dark:text-white">Progres Anggaran</h4>
-                            <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 dark:bg-success-500/10 dark:text-success-400 text-xs font-bold uppercase whitespace-nowrap">{filters.month}</span>
+                            <div className="flex items-center gap-2">
+                                {endDate && new Date(endDate).getTime() > Date.now() && <span className="text-xs text-bgray-500 font-medium bg-bgray-50 dark:bg-darkblack-500 px-2 py-1 rounded">Sisa {Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000)} hari</span>}
+                                <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 dark:bg-success-500/10 dark:text-success-400 text-xs font-bold uppercase whitespace-nowrap">{filters.month}</span>
+                            </div>
                         </div>
                         
                         <div className="space-y-6">
