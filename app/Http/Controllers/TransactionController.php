@@ -37,7 +37,7 @@ class TransactionController extends Controller
             'transactions' => $transactions,
             'categories' => $categories,
             'filters' => [
-                'month' => $request->input('month', date('Y-m')),
+                'month' => $request->input('month', $this->getDefaultMonth()),
                 'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
                 'search' => $search

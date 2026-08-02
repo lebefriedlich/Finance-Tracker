@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         [$startDate, $endDate] = $this->getDateRange($request);
-        $month = $request->input('month', date('Y-m'));
+        $month = $request->input('month', $this->getDefaultMonth());
 
         $lifetimeIncome = $user->transactions()->where('type', 'income')->sum('amount');
         $lifetimeExpense = $user->transactions()->where('type', 'expense')->sum('amount');

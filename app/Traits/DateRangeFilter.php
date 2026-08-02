@@ -7,6 +7,27 @@ use Carbon\Carbon;
 
 trait DateRangeFilter
 {
+    public function getDefaultMonth()
+    {
+        $user = auth()->check() ? auth()->user() : null;
+        if (!$user) return date('Y-m');
+
+        $cycleStart = $user->cycle_start_date ?? 1;
+        $today = Carbon::today();
+
+        if ($cycleStart > 2) {
+            if ($today->day >= $cycleStart) {
+                return $today->addMonth()->format('Y-m');
+            }
+        } else {
+            if ($today->day < $cycleStart) {
+                return $today->subMonth()->format('Y-m');
+            }
+        }
+        
+        return $today->format('Y-m');
+    }
+
     public function getDateRange(Request $request)
     {
         $user = auth()->user();
@@ -19,14 +40,12 @@ trait DateRangeFilter
         }
 
         // Otherwise use month and cycle_start_date
-        $month = $request->input('month', date('Y-m'));
+        $month = $request->input('month', $this->getDefaultMonth());
         $cycleStart = $user->cycle_start_date ?? 1;
 
         $date = Carbon::createFromFormat('Y-m', $month);
         
-        // Jika tanggal mulai siklus di akhir bulan (misal > 15),
-        // biasanya itu adalah gaji untuk bulan berikutnya, jadi siklus dimulai bulan sebelumnya.
-        if ($cycleStart > 15) {
+        if ($cycleStart > 2) {
             $startDate = $date->copy()->subMonth()->day($cycleStart)->startOfDay();
         } else {
             $startDate = $date->copy()->day($cycleStart)->startOfDay();

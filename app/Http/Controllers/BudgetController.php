@@ -9,9 +9,11 @@ use App\Http\Requests\UpdateBudgetRequest;
 
 class BudgetController extends Controller
 {
+    use \App\Traits\DateRangeFilter;
+
     public function index(Request $request)
     {
-        $month = $request->input('month', date('Y-m'));
+        $month = $request->input('month', $this->getDefaultMonth());
         $query = auth()->user()->budgets()->with('category')->where('month', $month);
         if ($search = $request->input('search')) {
             $query->whereHas('category', function($q) use ($search) {
