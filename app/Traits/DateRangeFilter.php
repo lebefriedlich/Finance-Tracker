@@ -22,7 +22,15 @@ trait DateRangeFilter
         $month = $request->input('month', date('Y-m'));
         $cycleStart = $user->cycle_start_date ?? 1;
 
-        $startDate = Carbon::createFromFormat('Y-m', $month)->day($cycleStart)->startOfDay();
+        $date = Carbon::createFromFormat('Y-m', $month);
+        
+        // Jika tanggal mulai siklus di akhir bulan (misal > 15),
+        // biasanya itu adalah gaji untuk bulan berikutnya, jadi siklus dimulai bulan sebelumnya.
+        if ($cycleStart > 15) {
+            $startDate = $date->copy()->subMonth()->day($cycleStart)->startOfDay();
+        } else {
+            $startDate = $date->copy()->day($cycleStart)->startOfDay();
+        }
         
         // End date is one month later minus one day
         $endDate = $startDate->copy()->addMonth()->subDay()->endOfDay();
