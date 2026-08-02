@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'vapid_public_key' => env('VAPID_PUBLIC_KEY'),
         ];
     }
 }

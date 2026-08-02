@@ -71,7 +71,10 @@ class TransactionController extends Controller
         $category = auth()->user()->categories()->findOrFail($validated['category_id']);
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
 
-        auth()->user()->transactions()->create($validated);
+        $transaction = auth()->user()->transactions()->create($validated);
+        
+        $this->checkBudgetAlert($transaction);
+
         return redirect()->back();
     }
 
@@ -90,6 +93,9 @@ class TransactionController extends Controller
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
 
         $transaction->update($validated);
+        
+        $this->checkBudgetAlert($transaction);
+
         return redirect()->back();
     }
 
@@ -98,5 +104,38 @@ class TransactionController extends Controller
         $this->authorize('delete', $transaction);
         $transaction->delete();
         return redirect()->back();
+    }
+    
+    private function checkBudgetAlert(Transaction $transaction)
+    {
+        if ($transaction->type !== 'expense') return;
+
+        $month = substr($transaction->date, 0, 7);
+        $user = auth()->user();
+        
+        $budget = $user->budgets()->where('category_id', $transaction->category_id)
+            ->where('month', $month)->first();
+
+        if (!$budget || $budget->amount <= 0) return;
+
+        $request = new \Illuminate\Http\Request();
+        $request->merge(['month' => $month]);
+        [$startDate, $endDate] = $this->getDateRange($request);
+        
+        $totalSpent = $user->transactions()
+            ->where('category_id', $transaction->category_id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+            
+        $totalSpentBefore = $totalSpent - $transaction->amount;
+        
+        $percentage = ($totalSpent / $budget->amount) * 100;
+        $percentageBefore = ($totalSpentBefore / $budget->amount) * 100;
+        
+        if ($percentage >= 100 && $percentageBefore < 100) {
+            $user->notify(new \App\Notifications\BudgetAlertNotification($transaction->category->name, round($percentage)));
+        } elseif ($percentage >= 80 && $percentage < 100 && $percentageBefore < 80) {
+            $user->notify(new \App\Notifications\BudgetAlertNotification($transaction->category->name, round($percentage)));
+        }
     }
 }

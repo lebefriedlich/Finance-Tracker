@@ -2,6 +2,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import PushNotificationPrompt from '@/Components/PushNotificationPrompt';
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
@@ -161,6 +162,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         {children}
                     </main>
 
+
                     {/* Mobile Bottom Nav */}
                     <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-darkblack-600 border-t border-bgray-200 dark:border-darkblack-400 flex justify-around items-center h-16 z-50 px-2 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                         {navs.map(n => (
@@ -173,6 +175,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         ))}
                     </div>
 
+                    <PushNotificationPrompt />
 
                 </div>
             </div>
