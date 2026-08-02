@@ -25,4 +25,16 @@ class PushSubscriptionController extends Controller
         
         return response()->json(['success' => true], 200);
     }
+
+    public function destroy(Request $request)
+    {
+        $this->validate($request, [
+            'endpoint' => 'required'
+        ]);
+
+        $user = auth()->user();
+        $user->deletePushSubscription($request->endpoint);
+        
+        return response()->json(['success' => true], 200);
+    }
 }

@@ -2,7 +2,6 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
-import PushNotificationPrompt from '@/Components/PushNotificationPrompt';
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
@@ -174,8 +173,6 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                             </Link>
                         ))}
                     </div>
-
-                    <PushNotificationPrompt />
 
                 </div>
             </div>

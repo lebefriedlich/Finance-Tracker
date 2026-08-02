@@ -17,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Push Subscription
     Route::post('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('admin.')->group(function () {
