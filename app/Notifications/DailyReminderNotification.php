@@ -33,8 +33,8 @@ class DailyReminderNotification extends Notification
     public function toWebPush($notifiable, $notification)
     {
         return (new WebPushMessage)
-            ->title('Pengingat Harian ✍️')
-            ->icon('/apple-touch-icon.png')
-            ->body('Hari ini ada pengeluaran? Yuk catat sekarang agar keuanganmu tetap terkontrol!');
+            ->title('Pengingat Harian 💰')
+            ->icon('/favicon.svg')
+            ->body('Jangan lupa catat pengeluaran atau pemasukan hari ini ya!');
     }
 }

@@ -43,7 +43,7 @@ class BudgetAlertNotification extends Notification
 
         return (new WebPushMessage)
             ->title('Peringatan Anggaran! 🚨')
-            ->icon('/apple-touch-icon.png')
+            ->icon('/favicon.svg')
             ->body($message);
     }
 }
