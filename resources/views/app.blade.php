@@ -24,7 +24,16 @@
             } else {
                 document.documentElement.classList.remove('dark');
             }
+            
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.documentElement.classList.add('touch-device');
+            }
         </script>
+        <style>
+            .touch-device * { 
+                transition: none !important; 
+            }
+        </style>
     </head>
     <body class="font-sans antialiased">
         @inertia
