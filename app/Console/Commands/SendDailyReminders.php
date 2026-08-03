@@ -31,9 +31,10 @@ class SendDailyReminders extends Command
         $today = Carbon::today()->toDateString();
 
         // Get users who don't have any transaction for today
-        $users = User::whereDoesntHave('transactions', function ($query) use ($today) {
-            $query->whereDate('date', $today);
-        })->get();
+        $users = User::where('role', '!=', 'admin')
+            ->whereDoesntHave('transactions', function ($query) use ($today) {
+                $query->whereDate('date', $today);
+            })->get();
 
         foreach ($users as $user) {
             if ($user->pushSubscriptions()->count() > 0) {
