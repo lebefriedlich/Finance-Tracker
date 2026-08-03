@@ -27,6 +27,7 @@
 }
 
 @variant dark (&:where(.dark, .dark *));
+@variant hover (@media (hover: hover) and (pointer: fine) { &:hover });
 
 html.dark {
   color-scheme: dark;
