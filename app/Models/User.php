@@ -74,4 +74,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Budget::class);
     }
+
+    /**
+     * Route notifications for the FCM channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string|array
+     */
+    public function routeNotificationForFcm($notification)
+    {
+        return $this->pushSubscriptions()->pluck('endpoint')->toArray();
+    }
 }

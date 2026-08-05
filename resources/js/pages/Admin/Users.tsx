@@ -7,7 +7,7 @@ import { Plus, X, Trash2, Edit2, Users as UsersIcon } from 'lucide-react';
 export default function Users({ users }: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
-    
+
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         name: '',
         email: '',
@@ -81,7 +81,7 @@ export default function Users({ users }: any) {
                             Daftar Pengguna
                         </h3>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-bgray-500 dark:text-bgray-400 uppercase bg-bgray-50 dark:bg-darkblack-500 border-b border-bgray-100 dark:border-darkblack-400">
@@ -104,7 +104,12 @@ export default function Users({ users }: any) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className={`px-3 py-1 text-[10px] font-bold rounded-md uppercase ${u.is_active ? 'bg-success-50 text-success-500' : 'bg-rose-50 text-rose-500'}`}>
+                                            <span
+                                                className={`px-3 py-1 text-[10px] font-bold rounded-md uppercase ${u.is_active
+                                                        ? 'bg-success-50 text-success-600 dark:bg-success-900/30 dark:text-success-300'
+                                                        : 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300'
+                                                    }`}
+                                            >
                                                 {u.is_active ? 'Aktif' : 'Tidak Aktif'}
                                             </span>
                                         </td>

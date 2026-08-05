@@ -7,6 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 use NotificationChannels\WebPush\WebPushChannel;
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class DailyReminderNotification extends Notification
 {
@@ -27,7 +30,7 @@ class DailyReminderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return [WebPushChannel::class];
+        return [WebPushChannel::class, FcmChannel::class];
     }
 
     public function toWebPush($notifiable, $notification)
@@ -36,5 +39,14 @@ class DailyReminderNotification extends Notification
             ->title('Pengingat Harian 💰')
             ->icon('/favicon.svg')
             ->body('Jangan lupa catat pengeluaran atau pemasukan hari ini ya!');
+    }
+
+    public function toFcm($notifiable)
+    {
+        return (new FcmMessage(notification: new FcmNotification(
+            title: 'Pengingat Harian 💰',
+            image: '/favicon.svg',
+            body: 'Jangan lupa catat pengeluaran atau pemasukan hari ini ya!',
+        )));
     }
 }

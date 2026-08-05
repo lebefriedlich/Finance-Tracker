@@ -7,6 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 use NotificationChannels\WebPush\WebPushChannel;
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class BudgetAlertNotification extends Notification
 {
@@ -31,7 +34,7 @@ class BudgetAlertNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return [WebPushChannel::class];
+        return [WebPushChannel::class, FcmChannel::class];
     }
 
     public function toWebPush($notifiable, $notification)
@@ -45,5 +48,20 @@ class BudgetAlertNotification extends Notification
             ->title('Peringatan Anggaran! 🚨')
             ->icon('/favicon.svg')
             ->body($message);
+    }
+
+    public function toFcm($notifiable)
+    {
+        $message = "Awas, pengeluaran kategori '{$this->categoryName}' kamu sudah mencapai {$this->percentage}% dari budget bulan ini!";
+        if ($this->percentage >= 100) {
+            $message = "Oops! Kamu sudah melebihi budget '{$this->categoryName}' bulan ini. Yuk rem dulu pengeluarannya.";
+        }
+
+        return (new FcmMessage(notification: new FcmNotification(
+                title: 'Peringatan Anggaran! 🚨',
+                image: '/favicon.svg',
+                body: $message,
+            )))
+            ->data(['category' => $this->categoryName, 'percentage' => (string) $this->percentage]);
     }
 }

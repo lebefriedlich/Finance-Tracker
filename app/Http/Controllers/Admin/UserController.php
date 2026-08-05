@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(15);
+        $users = User::where('role', '!=', 'owner')->orderBy('created_at', 'desc')->paginate(15);
         return inertia('Admin/Users', ['users' => $users]);
     }
 
