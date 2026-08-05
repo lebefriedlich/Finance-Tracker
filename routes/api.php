@@ -31,9 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/device-token', [DeviceTokenController::class, 'store']);
     Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
 
-    Route::apiResource('categories', CategoryController::class);
-    Route::apiResource('budgets', BudgetController::class);
-    Route::apiResource('transactions', TransactionController::class);
+    Route::name('api.')->group(function () {
+        Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('budgets', BudgetController::class);
+        Route::apiResource('transactions', TransactionController::class);
+    });
     
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('api.admin.')->group(function () {
