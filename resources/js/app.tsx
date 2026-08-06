@@ -31,7 +31,13 @@ if (typeof window !== 'undefined') {
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').then(registration => {
+            const firebaseParams = new URLSearchParams({
+                apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+                projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+                messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+                appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
+            }).toString();
+            navigator.serviceWorker.register(`/sw.js?${firebaseParams}`).then(registration => {
                 console.log('SW registered: ', registration);
             }).catch(registrationError => {
                 console.log('SW registration failed: ', registrationError);
