@@ -14,14 +14,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Push Subscription
-    Route::post('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
-    Route::delete('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
-
-    // Device Tokens for FCM
-    Route::post('/device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'store'])->name('device-token.store');
-    Route::delete('/device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'destroy'])->name('device-token.destroy');
 
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('admin.')->group(function () {

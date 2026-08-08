@@ -29,16 +29,11 @@ if (typeof window !== 'undefined') {
         },
     });
 
+    // ponytail: Basic Service Worker registration for PWA installability
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            const firebaseParams = new URLSearchParams({
-                apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-                projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
-                messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-                appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
-            }).toString();
-            navigator.serviceWorker.register(`/sw.js?${firebaseParams}`).then(registration => {
-                console.log('SW registered: ', registration);
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('SW registered for PWA: ', registration);
             }).catch(registrationError => {
                 console.log('SW registration failed: ', registrationError);
             });

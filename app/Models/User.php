@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use NotificationChannels\WebPush\HasPushSubscriptions;
 
 /**
  * @property int $id
@@ -25,7 +24,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasPushSubscriptions;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -75,14 +74,4 @@ class User extends Authenticatable
         return $this->hasMany(Budget::class);
     }
 
-    /**
-     * Route notifications for the FCM channel.
-     *
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return string|array
-     */
-    public function routeNotificationForFcm($notification)
-    {
-        return $this->pushSubscriptions()->pluck('endpoint')->toArray();
-    }
 }
