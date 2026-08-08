@@ -1,5 +1,7 @@
 import { Link, usePage, router } from '@inertiajs/react';
-import { PropsWithChildren, ReactNode, useState } from 'react';
+import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
+import axios from 'axios';
+import { requestFCMToken } from '../firebase';
 import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
@@ -11,6 +13,14 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         const isDark = document.documentElement.classList.toggle('dark');
         localStorage.theme = isDark ? 'dark' : 'light';
     };
+
+    useEffect(() => {
+        requestFCMToken().then(token => {
+            if (token) {
+                axios.post('/api/device-token', { token }).catch(console.error);
+            }
+        });
+    }, []);
 
     const navs = user.role === 'owner'
         ? [
