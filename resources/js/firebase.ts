@@ -14,8 +14,10 @@ export const messaging = getMessaging(app);
 
 export const requestFCMToken = async () => {
     try {
+        const registration = await navigator.serviceWorker.ready;
         const token = await getToken(messaging, {
-            // ponytail: VAPID key is required for Web Push. Add VITE_FIREBASE_VAPID_KEY to .env
+            // ponytail: pass custom SW registration since we use sw.js instead of firebase-messaging-sw.js
+            serviceWorkerRegistration: registration,
             vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
         });
         return token;
