@@ -10,6 +10,8 @@ use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
+use NotificationChannels\Fcm\Resources\WebpushConfig;
+use NotificationChannels\Fcm\Resources\WebpushFcmOptions;
 
 class DailyReminderNotification extends Notification
 {
@@ -47,6 +49,12 @@ class DailyReminderNotification extends Notification
             title: 'Pengingat Harian 💰',
             image: '/favicon.svg',
             body: 'Jangan lupa catat pengeluaran atau pemasukan hari ini ya!',
-        )));
+        )))->custom([
+            'webpush' => [
+                'fcm_options' => [
+                    'link' => url('/dashboard'),
+                ],
+            ],
+        ]);
     }
 }

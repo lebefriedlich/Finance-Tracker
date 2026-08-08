@@ -1,7 +1,7 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
 import axios from 'axios';
-import { requestFCMToken } from '../firebase';
+import { requestFCMToken, onForegroundMessage } from '../firebase';
 import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
@@ -15,11 +15,29 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
     };
 
     useEffect(() => {
+        // ponytail: automatically request FCM token and send to backend
         requestFCMToken().then(token => {
             if (token) {
                 axios.post('/device-token', { token }).catch(console.error);
             }
         });
+
+        // ponytail: handle notifications when the app is open (PWA friendly, especially iOS)
+        const unsubscribe = onForegroundMessage((payload: any) => {
+            console.log('Received foreground message', payload);
+            if (Notification.permission === 'granted' && payload.notification) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(payload.notification.title, {
+                        body: payload.notification.body,
+                        icon: payload.notification.image || '/favicon.svg'
+                    });
+                });
+            }
+        });
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
     }, []);
 
     const navs = user.role === 'owner'

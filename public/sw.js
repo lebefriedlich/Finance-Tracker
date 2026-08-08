@@ -2,13 +2,13 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
 
-// ponytail: Firebase config needed in SW too. You'll need to inject these or hardcode if simple.
-// Using URL search params trick to pass config to SW is cleaner, but hardcoding works.
+// ponytail: Use location.search to safely parse URL params in Service Worker context
+const params = new URLSearchParams(location.search);
 firebase.initializeApp({
-    apiKey: new URL(location).searchParams.get('apiKey'),
-    projectId: new URL(location).searchParams.get('projectId'),
-    messagingSenderId: new URL(location).searchParams.get('messagingSenderId'),
-    appId: new URL(location).searchParams.get('appId'),
+    apiKey: params.get('apiKey'),
+    projectId: params.get('projectId'),
+    messagingSenderId: params.get('messagingSenderId'),
+    appId: params.get('appId'),
 });
 
 const messaging = firebase.messaging();
