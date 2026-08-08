@@ -19,6 +19,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::delete('/push-subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 
+    // Device Tokens for FCM
+    Route::post('/device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'store'])->name('device-token.store');
+    Route::delete('/device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'destroy'])->name('device-token.destroy');
+
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);

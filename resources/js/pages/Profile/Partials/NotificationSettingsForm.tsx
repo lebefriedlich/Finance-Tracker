@@ -76,7 +76,7 @@ export default function NotificationSettingsForm({ className = '' }: { className
 
             const token = await requestFCMToken();
             if (token) {
-                await axios.post('/api/device-token', { token });
+                await axios.post('/device-token', { token });
                 setIsSubscribed(true);
             } else {
                 throw new Error("Token tidak didapatkan");
@@ -109,7 +109,7 @@ export default function NotificationSettingsForm({ className = '' }: { className
         try {
             const token = await requestFCMToken();
             if (token) {
-                await axios.delete('/api/device-token', { data: { token } });
+                await axios.delete('/device-token', { data: { token } });
             }
             setIsSubscribed(false);
         } catch (error) {

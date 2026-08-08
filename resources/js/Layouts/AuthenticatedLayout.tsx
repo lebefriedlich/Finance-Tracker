@@ -17,7 +17,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
     useEffect(() => {
         requestFCMToken().then(token => {
             if (token) {
-                axios.post('/api/device-token', { token }).catch(console.error);
+                axios.post('/device-token', { token }).catch(console.error);
             }
         });
     }, []);
