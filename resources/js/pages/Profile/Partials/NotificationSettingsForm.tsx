@@ -5,6 +5,7 @@ import { Bell, BellOff, AlertTriangle, Info } from 'lucide-react';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import { requestFCMToken } from '../../../firebase';
 
 export default function NotificationSettingsForm({ className = '' }: { className?: string }) {
     const { vapid_public_key } = usePage().props as any;
@@ -29,9 +30,7 @@ export default function NotificationSettingsForm({ className = '' }: { className
         }
 
         try {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
-            setIsSubscribed(!!subscription);
+            setIsSubscribed(Notification.permission === 'granted');
         } catch (error) {
             console.error('Error checking subscription:', error);
         }
@@ -75,16 +74,13 @@ export default function NotificationSettingsForm({ className = '' }: { className
                 return;
             }
 
-            const registration = await navigator.serviceWorker.ready;
-            const subscribeOptions = {
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapid_public_key)
-            };
-
-            const pushSubscription = await registration.pushManager.subscribe(subscribeOptions);
-            await axios.post('/push-subscribe', pushSubscription.toJSON());
-            
-            setIsSubscribed(true);
+            const token = await requestFCMToken();
+            if (token) {
+                await axios.post('/api/device-token', { token });
+                setIsSubscribed(true);
+            } else {
+                throw new Error("Token tidak didapatkan");
+            }
         } catch (error) {
             console.error('Error subscribing to push notifications:', error);
             setModalData({
@@ -111,12 +107,9 @@ export default function NotificationSettingsForm({ className = '' }: { className
     const unsubscribeFromPush = async () => {
         setLoading(true);
         try {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
-            
-            if (subscription) {
-                await axios.delete('/push-subscribe', { data: { endpoint: subscription.endpoint } });
-                await subscription.unsubscribe();
+            const token = await requestFCMToken();
+            if (token) {
+                await axios.delete('/api/device-token', { data: { token } });
             }
             setIsSubscribed(false);
         } catch (error) {
