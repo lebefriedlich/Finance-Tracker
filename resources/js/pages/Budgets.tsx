@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { Plus, X, Trash2, Wallet, Edit2, Search } from 'lucide-react';
 
@@ -8,6 +8,7 @@ export default function Budgets({ budgets, categories, filters }: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const searchTimeout = useRef<any>(null);
     
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         category_id: '',
@@ -78,7 +79,7 @@ export default function Budgets({ budgets, categories, filters }: any) {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                         <Search className="w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
                     </div>
-                    <input type="text" placeholder="Cari anggaran..." defaultValue={filters.search} onKeyDown={e => e.key === 'Enter' && router.get(route('budgets.index'), { ...filters, search: e.currentTarget.value }, { preserveState: true })} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
+                    <input type="text" placeholder="Cari anggaran..." defaultValue={filters.search} onChange={e => { clearTimeout(searchTimeout.current); searchTimeout.current = setTimeout(() => router.get(route('budgets.index'), { ...filters, search: e.target.value }, { preserveState: true }), 300); }} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto ml-auto">
                     <input type="month" value={filters.month} onChange={handleMonthChange} className="px-4 py-2.5 min-h-[44px] rounded-xl border-gray-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-800/80 dark:border-gray-700/50 dark:text-white backdrop-blur-sm font-semibold text-sm" />
@@ -89,8 +90,9 @@ export default function Budgets({ budgets, categories, filters }: any) {
             </div>
 
             <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-white/50 dark:border-gray-700/50 overflow-hidden max-w-4xl mx-auto">
-                <table className="w-full text-sm text-left border-collapse">
-                    <thead className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-700/50">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border-collapse">
+                        <thead className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-700/50">
                         <tr>
                             <th className="px-6 py-4 font-semibold">Kategori</th>
                             <th className="px-6 py-4 font-semibold text-right">Jumlah</th>
@@ -125,7 +127,8 @@ export default function Budgets({ budgets, categories, filters }: any) {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
 
             <Transition show={isOpen}>

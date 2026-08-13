@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { Plus, X, Trash2, Receipt, Edit2, Search } from 'lucide-react';
 
@@ -8,6 +8,7 @@ export default function Transactions({ transactions, categories, filters }: any)
     const [isOpen, setIsOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const searchTimeout = useRef<any>(null);
     
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         category_id: '',
@@ -96,7 +97,7 @@ export default function Transactions({ transactions, categories, filters }: any)
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                             <Search className="w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
                         </div>
-                        <input type="text" placeholder="Cari transaksi..." defaultValue={filters.search} onKeyDown={e => e.key === 'Enter' && router.get(route('transactions.index'), { ...filters, search: e.currentTarget.value }, { preserveState: true })} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
+                        <input type="text" placeholder="Cari transaksi..." defaultValue={filters.search} onChange={e => { clearTimeout(searchTimeout.current); searchTimeout.current = setTimeout(() => router.get(route('transactions.index'), { ...filters, search: e.target.value }, { preserveState: true }), 300); }} className="pl-10 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 rounded-2xl focus:border-emerald-500 focus:ring-emerald-500 text-sm shadow-sm transition-all dark:text-white backdrop-blur-sm" />
                     </div>
                     {!showCustomDate ? (
                         <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-sm">
