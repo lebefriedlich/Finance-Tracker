@@ -1,6 +1,6 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
-import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon, CreditCard } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
@@ -19,6 +19,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         : [
             { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard, active: route().current('dashboard') },
             { name: 'Keuangan', href: route('transactions.index'), icon: Receipt, active: route().current('transactions.*') },
+            { name: 'Rekening', href: route('accounts.index'), icon: CreditCard, active: route().current('accounts.*') },
             { name: 'Kategori', href: route('categories.index'), icon: Tags, active: route().current('categories.*') },
             { name: 'Anggaran', href: route('budgets.index'), icon: Wallet, active: route().current('budgets.*') },
         ];

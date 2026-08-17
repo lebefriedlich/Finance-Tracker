@@ -29,7 +29,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function collection()
     {
-        $query = Transaction::with('category')->where('user_id', auth()->id());
+        $query = Transaction::with(['category', 'account'])->where('user_id', auth()->id());
         
         if ($this->startDate) {
             $query->whereDate('date', '>=', $this->startDate);
@@ -43,10 +43,10 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function headings(): array
     {
-        return [
             'Tanggal',
             'Tipe',
             'Kategori',
+            'Sumber Dana',
             'Jumlah (Rp)',
             'Keterangan',
         ];
@@ -54,10 +54,10 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function map($transaction): array
     {
-        return [
             $transaction->date,
             $transaction->type === 'income' ? 'Pemasukan' : 'Pengeluaran',
             $transaction->category->name ?? '-',
+            $transaction->account->name ?? '-',
             $transaction->amount,
             $transaction->description,
         ];
@@ -66,7 +66,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
     public function columnFormats(): array
     {
         return [
-            'D' => '#,##0',
+            'E' => '#,##0',
         ];
     }
 
@@ -74,7 +74,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
     {
         $rowCount = $sheet->getHighestRow();
         
-        $sheet->getStyle('A1:E1')->applyFromArray([
+        $sheet->getStyle('A1:F1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
@@ -86,7 +86,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
         ]);
 
         if ($rowCount > 1) {
-            $sheet->getStyle('A2:E' . $rowCount)->applyFromArray([
+            $sheet->getStyle('A2:F' . $rowCount)->applyFromArray([
                 'borders' => [
                     'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFDDDDDD']],
                 ],

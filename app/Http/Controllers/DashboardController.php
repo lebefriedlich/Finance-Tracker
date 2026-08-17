@@ -63,14 +63,16 @@ class DashboardController extends Controller
         })->values();
 
         $recentTransactions = $user->transactions()
-            ->with('category')
+            ->with(['category', 'account'])
             ->orderBy('date', 'desc')
             ->take(10)
             ->get();
+            
+        $accounts = $user->accounts()->orderBy('name')->get();
 
         return compact(
             'startDate', 'endDate', 'month', 'totalBalance', 'monthlyIncome', 'monthlyExpense',
-            'monthlyCashflow', 'budgetProgress', 'expenseChart', 'recentTransactions'
+            'monthlyCashflow', 'budgetProgress', 'expenseChart', 'recentTransactions', 'accounts'
         );
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ProfileController;
@@ -27,20 +28,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
-    // Device Tokens for Push Notifications
-    Route::post('/device-token', [DeviceTokenController::class, 'store']);
-    Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
-
     Route::name('api.')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('budgets', BudgetController::class);
+        Route::apiResource('accounts', AccountController::class);
         Route::apiResource('transactions', TransactionController::class);
     });
-    
+
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('api.admin.')->group(function () {
         Route::apiResource('users', UserController::class);
     });
 });
-
-

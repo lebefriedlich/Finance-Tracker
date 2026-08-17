@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transactions/export', [\App\Http\Controllers\TransactionController::class, 'export'])->name('transactions.export');
         Route::resource('transactions', \App\Http\Controllers\TransactionController::class);
         Route::resource('budgets', \App\Http\Controllers\BudgetController::class);
+        Route::resource('accounts', \App\Http\Controllers\AccountController::class)->except(['create', 'show', 'edit']);
     });
 });
 

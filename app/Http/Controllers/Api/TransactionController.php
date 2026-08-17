@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 
 class TransactionController extends Controller
@@ -14,7 +15,7 @@ class TransactionController extends Controller
     {
         [$startDate, $endDate] = $this->getDateRange($request);
         
-        $query = $request->user()->transactions()->with('category');
+        $query = $request->user()->transactions()->with(['category', 'account']);
         
         if ($startDate) $query->whereDate('date', '>=', $startDate);
         if ($endDate) $query->whereDate('date', '<=', $endDate);
@@ -46,6 +47,7 @@ class TransactionController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'account_id' => 'required|exists:accounts,id',
             'date' => 'required|date',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0.01',
@@ -57,14 +59,26 @@ class TransactionController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Type mismatch'], 400);
         }
 
-        $transaction = $request->user()->transactions()->create($validated);
+        $account = $request->user()->accounts()->findOrFail($validated['account_id']);
+
+        $transaction = DB::transaction(function () use ($request, $validated, $account) {
+            $transaction = $request->user()->transactions()->create($validated);
+
+            if ($transaction->type === 'income') {
+                $account->increment('balance', $transaction->amount);
+            } else {
+                $account->decrement('balance', $transaction->amount);
+            }
+
+            return $transaction;
+        });
 
         $this->checkBudgetAlert($transaction);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Data transaksi berhasil ditambahkan',
-            'data' => $transaction
+            'data' => $transaction->load(['category', 'account'])
         ], 201);
     }
 
@@ -74,7 +88,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $transaction->load('category')
+            'data' => $transaction->load(['category', 'account'])
         ]);
     }
 
@@ -84,6 +98,7 @@ class TransactionController extends Controller
 
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'account_id' => 'required|exists:accounts,id',
             'date' => 'required|date',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0.01',
@@ -94,15 +109,37 @@ class TransactionController extends Controller
         if ($category->type !== $validated['type']) {
             return response()->json(['status' => 'error', 'message' => 'Type mismatch'], 400);
         }
+        
+        $newAccount = $request->user()->accounts()->findOrFail($validated['account_id']);
 
-        $transaction->update($validated);
+        DB::transaction(function () use ($transaction, $validated, $newAccount) {
+            $oldAmount = $transaction->amount;
+            $oldType = $transaction->type;
+            $oldAccount = $transaction->account;
+
+            if ($oldAccount) {
+                if ($oldType === 'income') {
+                    $oldAccount->decrement('balance', $oldAmount);
+                } else {
+                    $oldAccount->increment('balance', $oldAmount);
+                }
+            }
+
+            $transaction->update($validated);
+
+            if ($transaction->type === 'income') {
+                $newAccount->increment('balance', $transaction->amount);
+            } else {
+                $newAccount->decrement('balance', $transaction->amount);
+            }
+        });
 
         $this->checkBudgetAlert($transaction);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Data transaksi berhasil diperbarui',
-            'data' => $transaction
+            'data' => $transaction->load(['category', 'account'])
         ]);
     }
 
@@ -110,7 +147,19 @@ class TransactionController extends Controller
     {
         if ($transaction->user_id !== $request->user()->id) abort(403);
 
-        $transaction->delete();
+        DB::transaction(function () use ($transaction) {
+            $account = $transaction->account;
+            
+            if ($account) {
+                if ($transaction->type === 'income') {
+                    $account->decrement('balance', $transaction->amount);
+                } else {
+                    $account->increment('balance', $transaction->amount);
+                }
+            }
+            
+            $transaction->delete();
+        });
 
         return response()->json([
             'status' => 'success',

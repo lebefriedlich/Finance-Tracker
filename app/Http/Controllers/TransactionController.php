@@ -15,7 +15,7 @@ class TransactionController extends Controller
     {
         [$startDate, $endDate] = $this->getDateRange($request);
         
-        $query = auth()->user()->transactions()->with('category');
+        $query = auth()->user()->transactions()->with(['category', 'account']);
         
         if ($startDate) $query->whereDate('date', '>=', $startDate);
         if ($endDate) $query->whereDate('date', '<=', $endDate);
@@ -32,10 +32,12 @@ class TransactionController extends Controller
         $transactions = $query->orderBy('date', 'desc')->paginate(15)->withQueryString();
 
         $categories = auth()->user()->categories()->get();
+        $accounts = auth()->user()->accounts()->orderBy('name')->get();
 
         return inertia('Transactions', [
             'transactions' => $transactions,
             'categories' => $categories,
+            'accounts' => $accounts,
             'filters' => [
                 'month' => $request->input('month', $this->getDefaultMonth()),
                 'start_date' => $request->input('start_date'),
@@ -61,6 +63,7 @@ class TransactionController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'account_id' => 'required|exists:accounts,id',
             'date' => 'required|date',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0.01',
@@ -70,8 +73,18 @@ class TransactionController extends Controller
         // Ensure category belongs to user
         $category = auth()->user()->categories()->findOrFail($validated['category_id']);
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
+        
+        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
 
-        $transaction = auth()->user()->transactions()->create($validated);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $account, &$transaction) {
+            $transaction = auth()->user()->transactions()->create($validated);
+            
+            if ($transaction->type === 'income') {
+                $account->increment('balance', $transaction->amount);
+            } else {
+                $account->decrement('balance', $transaction->amount);
+            }
+        });
         
         $this->checkBudgetAlert($transaction);
 
@@ -83,6 +96,7 @@ class TransactionController extends Controller
         $this->authorize('update', $transaction);
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'account_id' => 'required|exists:accounts,id',
             'date' => 'required|date',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0.01',
@@ -92,7 +106,30 @@ class TransactionController extends Controller
         $category = auth()->user()->categories()->findOrFail($validated['category_id']);
         if ($category->type !== $validated['type']) abort(400, 'Type mismatch');
 
-        $transaction->update($validated);
+        $newAccount = auth()->user()->accounts()->findOrFail($validated['account_id']);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $transaction, $newAccount) {
+            // Revert old balance
+            if ($transaction->account_id) {
+                $oldAccount = auth()->user()->accounts()->find($transaction->account_id);
+                if ($oldAccount) {
+                    if ($transaction->type === 'income') {
+                        $oldAccount->decrement('balance', $transaction->amount);
+                    } else {
+                        $oldAccount->increment('balance', $transaction->amount);
+                    }
+                }
+            }
+
+            $transaction->update($validated);
+            
+            // Apply new balance
+            if ($transaction->type === 'income') {
+                $newAccount->increment('balance', $transaction->amount);
+            } else {
+                $newAccount->decrement('balance', $transaction->amount);
+            }
+        });
         
         $this->checkBudgetAlert($transaction);
 
@@ -102,7 +139,20 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         $this->authorize('delete', $transaction);
-        $transaction->delete();
+        
+        \Illuminate\Support\Facades\DB::transaction(function () use ($transaction) {
+            if ($transaction->account_id) {
+                $account = auth()->user()->accounts()->find($transaction->account_id);
+                if ($account) {
+                    if ($transaction->type === 'income') {
+                        $account->decrement('balance', $transaction->amount);
+                    } else {
+                        $account->increment('balance', $transaction->amount);
+                    }
+                }
+            }
+            $transaction->delete();
+        });
         return redirect()->back();
     }
     

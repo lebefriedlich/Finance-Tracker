@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, TrendingUp, TrendingDown, Activity, ArrowUpRight, ArrowDownRight, Download } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense, monthlyCashflow, budgetProgress, expenseChart, recentTransactions, filters, endDate }: any) {
+export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense, monthlyCashflow, budgetProgress, expenseChart, recentTransactions, accounts, filters, endDate }: any) {
     const { user } = usePage().props.auth;
     const formatRp = (num: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
     const formatDate = (dateStr: string) => new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(dateStr));
@@ -204,6 +204,32 @@ export default function Dashboard({ totalBalance, monthlyIncome, monthlyExpense,
                                 <p className="absolute inset-0 flex items-center justify-center text-bgray-400 italic text-sm">Tidak ada pengeluaran bulan ini.</p>
                             )}
                         </div>
+                    </div>
+                </div>
+
+                {/* Accounts / Wallets Summary */}
+                <div className="rounded-2xl bg-white dark:bg-darkblack-600 p-8 shadow-md border border-bgray-100 dark:border-darkblack-400 mb-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-lg font-bold text-bgray-900 dark:text-white">Rekening & Dompet</h4>
+                        <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-500 text-xs font-bold uppercase whitespace-nowrap">Saldo</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {accounts && accounts.length > 0 ? accounts.map((account: any) => (
+                            <div key={account.id} className="p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-semibold text-gray-700 dark:text-gray-300">{account.name}</span>
+                                    <span className="text-xs uppercase px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-400">{account.type}</span>
+                                </div>
+                                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                                    {formatRp(account.balance)}
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="col-span-full p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-center text-gray-500">
+                                Belum ada rekening atau dompet yang ditambahkan.
+                            </div>
+                        )}
                     </div>
                 </div>
 

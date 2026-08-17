@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { Plus, X, Trash2, Receipt, Edit2, Search } from 'lucide-react';
 
-export default function Transactions({ transactions, categories, filters }: any) {
+export default function Transactions({ transactions, categories, accounts, filters }: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -12,6 +12,7 @@ export default function Transactions({ transactions, categories, filters }: any)
     
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         category_id: '',
+        account_id: '',
         date: new Date().toISOString().split('T')[0],
         type: 'expense',
         amount: '',
@@ -32,6 +33,7 @@ export default function Transactions({ transactions, categories, filters }: any)
         clearErrors();
         setData({
             category_id: tx.category_id,
+            account_id: tx.account_id || '',
             date: tx.date ? String(tx.date).split('T')[0] : '',
             type: tx.type,
             amount: tx.amount,
@@ -142,6 +144,7 @@ export default function Transactions({ transactions, categories, filters }: any)
                         <thead className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-700/50">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">Tanggal</th>
+                                <th className="px-6 py-4 font-semibold">Sumber Dana</th>
                                 <th className="px-6 py-4 font-semibold">Kategori</th>
                                 <th className="px-6 py-4 font-semibold">Deskripsi</th>
                                 <th className="px-6 py-4 font-semibold text-right">Jumlah</th>
@@ -152,6 +155,11 @@ export default function Transactions({ transactions, categories, filters }: any)
                             {transactions.data.length > 0 ? transactions.data.map((tx: any) => (
                                 <tr key={tx.id} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400 font-medium">{formatDate(tx.date)}</td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                            {tx.account ? tx.account.name : '-'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
                                             {tx.category.name}
@@ -217,6 +225,16 @@ export default function Transactions({ transactions, categories, filters }: any)
                                                     <button type="button" onClick={() => setData('type', 'expense')} className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${data.type === 'expense' ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>Pengeluaran</button>
                                                     <button type="button" onClick={() => setData('type', 'income')} className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${data.type === 'income' ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>Pemasukan</button>
                                                 </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold mb-2 dark:text-gray-200">Sumber Dana</label>
+                                                <select required value={data.account_id} onChange={e => setData('account_id', e.target.value)} className="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3 min-h-[48px]">
+                                                    <option value="" disabled>Pilih Rekening/Dompet</option>
+                                                    {(accounts || []).map((a: any) => (
+                                                        <option key={a.id} value={a.id}>{a.name}</option>
+                                                    ))}
+                                                </select>
+                                                {errors.account_id && <p className="text-red-500 text-xs mt-1 font-medium">{errors.account_id}</p>}
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-semibold mb-2 dark:text-gray-200">Kategori</label>
