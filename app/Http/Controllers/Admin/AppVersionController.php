@@ -21,6 +21,7 @@ class AppVersionController extends Controller
             'build_number' => 'required|integer',
             'is_force_update' => 'boolean',
             'description' => 'nullable|string',
+            'download_url' => 'nullable|url|max:255',
         ]);
         
         AppVersion::create($validated);
@@ -34,6 +35,7 @@ class AppVersionController extends Controller
             'build_number' => 'required|integer',
             'is_force_update' => 'boolean',
             'description' => 'nullable|string',
+            'download_url' => 'nullable|url|max:255',
         ]);
         
         $appVersion->update($validated);
