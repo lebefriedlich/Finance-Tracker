@@ -1,6 +1,6 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
-import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Receipt, Tags, Wallet, LogOut, Moon, Sun, Plus, User as UserIcon, CreditCard, Smartphone } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
@@ -14,7 +14,8 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
     const navs = user.role === 'owner'
         ? [
-            { name: 'Daftar Pengguna', href: route('admin.users.index'), icon: UserIcon, active: route().current('admin.users.*') }
+            { name: 'Daftar Pengguna', href: route('admin.users.index'), icon: UserIcon, active: route().current('admin.users.*') },
+            { name: 'Versi Aplikasi', href: route('admin.app-versions.index'), icon: Smartphone, active: route().current('admin.app-versions.*') }
         ]
         : [
             { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard, active: route().current('dashboard') },

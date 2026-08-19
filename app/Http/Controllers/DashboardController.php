@@ -14,9 +14,7 @@ class DashboardController extends Controller
         [$startDate, $endDate] = $this->getDateRange($request);
         $month = $request->input('month', $this->getDefaultMonth());
 
-        $lifetimeIncome = $user->transactions()->where('type', 'income')->sum('amount');
-        $lifetimeExpense = $user->transactions()->where('type', 'expense')->sum('amount');
-        $totalBalance = $lifetimeIncome - $lifetimeExpense;
+        $totalBalance = $user->accounts()->sum('balance');
 
         $query = $user->transactions();
         if ($startDate) $query->whereDate('date', '>=', $startDate);
@@ -50,7 +48,7 @@ class DashboardController extends Controller
                 'status' => $status,
             ];
         })->filter(function ($bp) {
-            return $bp['budget'] > 0 || $bp['spent'] > 0;
+            return $bp['budget'] > 0;
         })->values();
 
         // Expense distribution
@@ -69,10 +67,12 @@ class DashboardController extends Controller
             ->get();
             
         $accounts = $user->accounts()->orderBy('name')->get();
+        
+        $unreadNotificationsCount = $user->unreadNotifications()->count();
 
         return compact(
             'startDate', 'endDate', 'month', 'totalBalance', 'monthlyIncome', 'monthlyExpense',
-            'monthlyCashflow', 'budgetProgress', 'expenseChart', 'recentTransactions', 'accounts'
+            'monthlyCashflow', 'budgetProgress', 'expenseChart', 'recentTransactions', 'accounts', 'unreadNotificationsCount'
         );
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Carbon;
 
 /**
@@ -24,7 +25,7 @@ use Illuminate\Support\Carbon;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -33,6 +34,7 @@ class User extends Authenticatable
         'role',
         'is_active',
         'cycle_start_date',
+        'fcm_token',
     ];
 
     /**
@@ -77,5 +79,16 @@ class User extends Authenticatable
     public function accounts()
     {
         return $this->hasMany(Account::class);
+    }
+
+    /**
+     * Route notifications for the FCM channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string|null
+     */
+    public function routeNotificationForFcm($notification)
+    {
+        return $this->fcm_token;
     }
 }

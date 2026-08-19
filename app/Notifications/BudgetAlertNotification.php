@@ -34,7 +34,7 @@ class BudgetAlertNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return [WebPushChannel::class, FcmChannel::class];
+        return [FcmChannel::class, 'database'];
     }
 
     public function toWebPush($notifiable, $notification)
@@ -52,16 +52,38 @@ class BudgetAlertNotification extends Notification
 
     public function toFcm($notifiable)
     {
-        $message = "Awas, pengeluaran kategori '{$this->categoryName}' kamu sudah mencapai {$this->percentage}% dari budget bulan ini!";
+        $message = "Watch out, your spending in the '{$this->categoryName}' category has reached {$this->percentage}% of this month's budget!";
         if ($this->percentage >= 100) {
-            $message = "Oops! Kamu sudah melebihi budget '{$this->categoryName}' bulan ini. Yuk rem dulu pengeluarannya.";
+            $message = "Oops! You've exceeded your '{$this->categoryName}' budget for this month. Let's slow down on the spending.";
         }
 
         return (new FcmMessage(notification: new FcmNotification(
-                title: 'Peringatan Anggaran! 🚨',
-                image: '/favicon.svg',
+                title: 'Budget Alert! 🚨',
                 body: $message,
             )))
-            ->data(['category' => $this->categoryName, 'percentage' => (string) $this->percentage]);
+            ->data(['category' => $this->categoryName, 'percentage' => (string) $this->percentage])
+            ->android([
+                'notification' => [
+                    'channel_id' => 'alert_channel',
+                    'sound' => 'alert.wav',
+                    'color' => '#FF0000',
+                ],
+            ]);
+    }
+
+    public function toArray(object $notifiable): array
+    {
+        $message = "Watch out, your spending in the '{$this->categoryName}' category has reached {$this->percentage}% of this month's budget!";
+        if ($this->percentage >= 100) {
+            $message = "Oops! You've exceeded your '{$this->categoryName}' budget for this month. Let's slow down on the spending.";
+        }
+
+        return [
+            'title' => 'Budget Alert! 🚨',
+            'message' => $message,
+            'type' => 'budget_alert',
+            'category' => $this->categoryName,
+            'percentage' => $this->percentage,
+        ];
     }
 }

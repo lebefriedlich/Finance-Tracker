@@ -75,6 +75,10 @@ class TransactionController extends Controller
 
         $this->checkBudgetAlert($transaction);
 
+        if ($request->user()->fcm_token) {
+            $request->user()->notify(new \App\Notifications\TransactionSavedNotification($transaction));
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Data transaksi berhasil ditambahkan',
@@ -135,6 +139,10 @@ class TransactionController extends Controller
         });
 
         $this->checkBudgetAlert($transaction);
+
+        if ($request->user()->fcm_token) {
+            $request->user()->notify(new \App\Notifications\TransactionSavedNotification($transaction));
+        }
 
         return response()->json([
             'status' => 'success',

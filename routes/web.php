@@ -18,6 +18,7 @@ Route::middleware(['auth'])->group(function () {
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::resource('app-versions', \App\Http\Controllers\Admin\AppVersionController::class);
     });
 
     // User Routes

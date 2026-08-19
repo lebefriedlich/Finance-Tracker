@@ -32,14 +32,13 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
         ]);
-
-        $user->assignRole($validated['role']);
 
         return response()->json([
             'status' => 'success',
             'message' => 'User berhasil ditambahkan',
-            'data' => $user->load('roles')
+            'data' => $user
         ], 201);
     }
 
@@ -47,7 +46,7 @@ class UserController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'data' => $user->load('roles')
+            'data' => $user
         ]);
     }
 
@@ -62,6 +61,7 @@ class UserController extends Controller
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'role' => $validated['role'],
         ]);
 
         if ($request->filled('password')) {
@@ -69,12 +69,10 @@ class UserController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        $user->syncRoles([$validated['role']]);
-
         return response()->json([
             'status' => 'success',
             'message' => 'User berhasil diperbarui',
-            'data' => $user->load('roles')
+            'data' => $user
         ]);
     }
 

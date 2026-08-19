@@ -30,19 +30,20 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
     public function collection()
     {
         $query = Transaction::with(['category', 'account'])->where('user_id', auth()->id());
-        
+
         if ($this->startDate) {
             $query->whereDate('date', '>=', $this->startDate);
         }
         if ($this->endDate) {
             $query->whereDate('date', '<=', $this->endDate);
         }
-        
+
         return $query->orderBy('date', 'desc')->get();
     }
 
     public function headings(): array
     {
+        return [
             'Tanggal',
             'Tipe',
             'Kategori',
@@ -54,6 +55,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function map($transaction): array
     {
+        return [
             $transaction->date,
             $transaction->type === 'income' ? 'Pemasukan' : 'Pengeluaran',
             $transaction->category->name ?? '-',
@@ -73,7 +75,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
     public function styles(Worksheet $sheet)
     {
         $rowCount = $sheet->getHighestRow();
-        
+
         $sheet->getStyle('A1:F1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
             'fill' => [
