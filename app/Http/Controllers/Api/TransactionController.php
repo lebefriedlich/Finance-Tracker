@@ -14,26 +14,40 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         [$startDate, $endDate] = $this->getDateRange($request);
-        
+
         $query = $request->user()->transactions()->with(['category', 'account']);
-        
+
         if ($startDate) $query->whereDate('date', '>=', $startDate);
         if ($endDate) $query->whereDate('date', '<=', $endDate);
 
         if ($search = $request->input('search')) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhereHas('category', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        $transactions = $query->orderBy('date', 'desc')->paginate(15)->withQueryString();
+        $datesQuery = clone $query;
+        $datesQuery->setEagerLoads([]);
+
+        $dates = $datesQuery->select(DB::raw('DATE(date) as date_group'))
+            ->distinct()
+            ->orderBy('date_group', 'desc')
+            ->paginate(7)
+            ->withQueryString();
+
+        $transactions = $query->whereIn(DB::raw('DATE(date)'), $dates->pluck('date_group'))
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $dates->setCollection($transactions);
 
         return response()->json([
             'status' => 'success',
-            'data' => $transactions,
+            'data' => $dates,
             'filters' => [
                 'month' => $request->input('month', $this->getDefaultMonth()),
                 'start_date' => $request->input('start_date'),
@@ -75,10 +89,6 @@ class TransactionController extends Controller
 
         $this->checkBudgetAlert($transaction);
 
-        if ($request->user()->fcm_token) {
-            $request->user()->notify(new \App\Notifications\TransactionSavedNotification($transaction));
-        }
-
         return response()->json([
             'status' => 'success',
             'message' => 'Data transaksi berhasil ditambahkan',
@@ -113,7 +123,7 @@ class TransactionController extends Controller
         if ($category->type !== $validated['type']) {
             return response()->json(['status' => 'error', 'message' => 'Type mismatch'], 400);
         }
-        
+
         $newAccount = $request->user()->accounts()->findOrFail($validated['account_id']);
 
         DB::transaction(function () use ($transaction, $validated, $newAccount) {
@@ -140,10 +150,6 @@ class TransactionController extends Controller
 
         $this->checkBudgetAlert($transaction);
 
-        if ($request->user()->fcm_token) {
-            $request->user()->notify(new \App\Notifications\TransactionSavedNotification($transaction));
-        }
-
         return response()->json([
             'status' => 'success',
             'message' => 'Data transaksi berhasil diperbarui',
@@ -157,7 +163,7 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($transaction) {
             $account = $transaction->account;
-            
+
             if ($account) {
                 if ($transaction->type === 'income') {
                     $account->decrement('balance', $transaction->amount);
@@ -165,7 +171,7 @@ class TransactionController extends Controller
                     $account->increment('balance', $transaction->amount);
                 }
             }
-            
+
             $transaction->delete();
         });
 
@@ -181,7 +187,7 @@ class TransactionController extends Controller
 
         $month = substr($transaction->date, 0, 7);
         $user = auth()->user();
-        
+
         $budget = $user->budgets()->where('category_id', $transaction->category_id)
             ->where('month', $month)->first();
 
@@ -190,17 +196,17 @@ class TransactionController extends Controller
         $request = new \Illuminate\Http\Request();
         $request->merge(['month' => $month]);
         [$startDate, $endDate] = $this->getDateRange($request);
-        
+
         $totalSpent = $user->transactions()
             ->where('category_id', $transaction->category_id)
             ->whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
-            
+
         $totalSpentBefore = $totalSpent - $transaction->amount;
-        
+
         $percentage = ($totalSpent / $budget->amount) * 100;
         $percentageBefore = ($totalSpentBefore / $budget->amount) * 100;
-        
+
         if ($percentage >= 100 && $percentageBefore < 100) {
             $user->notify(new \App\Notifications\BudgetAlertNotification($transaction->category->name, round($percentage)));
         } elseif ($percentage >= 80 && $percentage < 100 && $percentageBefore < 80) {

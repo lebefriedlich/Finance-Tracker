@@ -66,6 +66,8 @@ class DashboardController extends Controller
 
         $recentTransactions = $user->transactions()
             ->with('category')
+            ->when($startDate, fn($q) => $q->whereDate('date', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->whereDate('date', '<=', $endDate))
             ->orderBy('date', 'desc')
             ->take(10)
             ->get();

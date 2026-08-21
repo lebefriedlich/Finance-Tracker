@@ -21,8 +21,16 @@ class BudgetController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'amount' => 'required|numeric|min:0.01',
-            'month' => 'required|string|size:7' // Format: YYYY-MM
+            'month' => 'required|string|size:7'
         ]);
+
+        $category = $request->user()->categories()->findOrFail($validated['category_id']);
+        if ($category->type !== 'expense') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Budget hanya bisa dibuat untuk kategori pengeluaran'
+            ], 400);
+        }
 
         $budget = $request->user()->budgets()->create($validated);
 
@@ -52,6 +60,14 @@ class BudgetController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'month' => 'required|string|size:7'
         ]);
+
+        $category = $request->user()->categories()->findOrFail($validated['category_id']);
+        if ($category->type !== 'expense') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Budget hanya bisa dibuat untuk kategori pengeluaran'
+            ], 400);
+        }
 
         $budget->update($validated);
 

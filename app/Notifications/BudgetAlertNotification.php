@@ -11,7 +11,7 @@ use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
-class BudgetAlertNotification extends Notification
+class BudgetAlertNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

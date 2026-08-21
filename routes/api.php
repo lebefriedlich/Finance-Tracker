@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::put('/profile/cycle-start-date', [ProfileController::class, 'updateCycleStartDate']);
 
     // User Routes
     Route::middleware(['role:user'])->group(function () {

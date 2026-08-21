@@ -45,7 +45,6 @@ class NotificationController extends Controller
                 $notification->markAsRead();
             }
         } else {
-            // Mark all as read
             $user->unreadNotifications->markAsRead();
         }
 

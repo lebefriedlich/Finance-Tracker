@@ -50,4 +50,19 @@ class ProfileController extends Controller
             'message' => 'Password berhasil diperbarui'
         ]);
     }
+
+    public function updateCycleStartDate(Request $request)
+    {
+        $validated = $request->validate([
+            'cycle_start_date' => 'required|integer|min:1|max:31',
+        ]);
+
+        $request->user()->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cycle start date berhasil diperbarui',
+            'data' => $request->user()
+        ]);
+    }
 }
