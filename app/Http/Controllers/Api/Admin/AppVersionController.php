@@ -75,9 +75,6 @@ class AppVersionController extends Controller
                 'message' => 'No versions found'
             ], 404);
         }
-        return response()->json([
-            'message' => 'Version details',
-            'data' => $latest
-        ]);
+        return response()->json($latest);
     }
 }
