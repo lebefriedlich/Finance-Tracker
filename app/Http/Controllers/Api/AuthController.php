@@ -23,16 +23,15 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Email atau password salah'
+                'message' => 'Email or password is not match.'
             ], 401);
         }
 
-        // Jika 'remember' true, token tidak pernah expired. Jika false, expired dalam 24 jam.
         $expiresAt = $request->boolean('remember') ? null : now()->addHours(24);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Login berhasil',
+            'message' => 'Login Success',
             'data' => [
                 'token' => $user->createToken('auth', ['*'], $expiresAt)->plainTextToken,
                 'user' => $user
@@ -46,7 +45,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Logout berhasil'
+            'message' => 'Logout Success'
         ]);
     }
 }

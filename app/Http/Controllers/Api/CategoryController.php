@@ -27,7 +27,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Kategori berhasil ditambahkan',
+            'message' => 'Category successfully added',
             'data' => $category
         ], 201);
     }
@@ -59,7 +59,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Kategori berhasil diperbarui',
+            'message' => 'Category successfully updated',
             'data' => $category
         ]);
     }
@@ -74,7 +74,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Kategori berhasil dihapus'
+            'message' => 'Category successfully deleted'
         ]);
     }
 }

@@ -91,7 +91,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data transaksi berhasil ditambahkan',
+            'message' => 'Transaction data successfully added.',
             'data' => $transaction->load(['category', 'account'])
         ], 201);
     }
@@ -152,7 +152,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data transaksi berhasil diperbarui',
+            'message' => 'Transaction data successfully updated',
             'data' => $transaction->load(['category', 'account'])
         ]);
     }
@@ -177,7 +177,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data transaksi berhasil dihapus'
+            'message' => 'Transaction data successfully deleted'
         ]);
     }
 

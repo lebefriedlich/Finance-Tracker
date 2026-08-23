@@ -7,15 +7,16 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\AccountController;
-use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\DeviceTokenController;
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\AppVersionController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
 // Public App Version
-Route::get('/app-version/latest', [\App\Http\Controllers\AppVersionController::class, 'latest']);
+Route::get('/app-version/latest', [AppVersionController::class, 'latest']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -52,6 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Owner Routes
     Route::middleware(['role:owner'])->prefix('admin')->name('api.admin.')->group(function () {
         Route::apiResource('users', UserController::class);
-        Route::apiResource('app-versions', \App\Http\Controllers\AppVersionController::class);
+        Route::apiResource('app-versions', AppVersionController::class);
     });
 });

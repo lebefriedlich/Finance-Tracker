@@ -29,7 +29,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Profil berhasil diperbarui',
+            'message' => 'Profile successfully updated',
             'data' => $user
         ]);
     }
@@ -47,7 +47,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Password berhasil diperbarui'
+            'message' => 'Password successfully updated'
         ]);
     }
 
@@ -61,7 +61,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Cycle start date berhasil diperbarui',
+            'message' => 'Cycle date successfully updated',
             'data' => $request->user()
         ]);
     }

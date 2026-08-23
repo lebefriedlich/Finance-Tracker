@@ -28,7 +28,7 @@ class BudgetController extends Controller
         if ($category->type !== 'expense') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Budget hanya bisa dibuat untuk kategori pengeluaran'
+                'message' => 'Budgets can only be created for expense categories.'
             ], 400);
         }
 
@@ -36,7 +36,7 @@ class BudgetController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Budget berhasil ditambahkan',
+            'message' => 'Budget successfully added',
             'data' => $budget
         ], 201);
     }
@@ -65,7 +65,7 @@ class BudgetController extends Controller
         if ($category->type !== 'expense') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Budget hanya bisa dibuat untuk kategori pengeluaran'
+                'message' => 'Budgets can only be created for expense categories.'
             ], 400);
         }
 
@@ -73,7 +73,7 @@ class BudgetController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Budget berhasil diperbarui',
+            'message' => 'Budget successfully updated',
             'data' => $budget
         ]);
     }
@@ -86,7 +86,7 @@ class BudgetController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Budget berhasil dihapus'
+            'message' => 'Budget successfully deleted'
         ]);
     }
 }

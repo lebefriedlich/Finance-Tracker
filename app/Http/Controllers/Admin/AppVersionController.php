@@ -23,7 +23,7 @@ class AppVersionController extends Controller
             'description' => 'nullable|string',
             'download_url' => 'nullable|url|max:255',
         ]);
-        
+
         AppVersion::create($validated);
         return redirect()->back();
     }
@@ -37,7 +37,7 @@ class AppVersionController extends Controller
             'description' => 'nullable|string',
             'download_url' => 'nullable|url|max:255',
         ]);
-        
+
         $appVersion->update($validated);
         return redirect()->back();
     }

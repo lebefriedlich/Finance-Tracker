@@ -14,7 +14,7 @@ class UserController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'message' => 'Data user berhasil diambil',
+            'message' => 'User data retrieved successfully',
             'data' => User::where('role', '!=', 'owner')->latest()->get()
         ]);
     }
@@ -37,7 +37,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User berhasil ditambahkan',
+            'message' => 'User created successfully',
             'data' => $user
         ], 201);
     }
@@ -71,7 +71,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User berhasil diperbarui',
+            'message' => 'User updated successfully',
             'data' => $user
         ]);
     }
@@ -81,7 +81,7 @@ class UserController extends Controller
         if (auth()->id() === $user->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Anda tidak dapat menghapus akun Anda sendiri'
+                'message' => 'You cannot delete your own account'
             ], 403);
         }
 
@@ -89,7 +89,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User berhasil dihapus'
+            'message' => 'User deleted successfully'
         ]);
     }
 }
