@@ -28,7 +28,11 @@ class DashboardController extends Controller
         $monthlyCashflow = $monthlyIncome - $monthlyExpense;
 
         // Categories with budget vs actual for this month
-        $budgets = $user->budgets()->where('month', $month)->get()->keyBy('category_id');
+        if ($month === 'all') {
+            $budgets = $user->budgets()->selectRaw('category_id, sum(amount) as amount')->groupBy('category_id')->get()->keyBy('category_id');
+        } else {
+            $budgets = $user->budgets()->where('month', $month)->get()->keyBy('category_id');
+        }
         $categoryExpenses = $monthlyTransactions->where('type', 'expense')->groupBy('category_id');
 
         $budgetProgress = $user->categories()->where('type', 'expense')->get()->map(function ($cat) use ($budgets, $categoryExpenses) {
@@ -98,3 +102,4 @@ class DashboardController extends Controller
         ]);
     }
 }
+

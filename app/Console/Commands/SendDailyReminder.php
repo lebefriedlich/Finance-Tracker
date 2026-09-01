@@ -28,7 +28,7 @@ class SendDailyReminder extends Command
      */
     public function handle()
     {
-        $today = Carbon::today();
+        $today = Carbon::now('Asia/Jakarta')->toDateString();
         
         $users = User::whereNotNull('fcm_token')->get();
         $count = 0;

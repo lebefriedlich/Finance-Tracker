@@ -25,6 +25,9 @@ class TransactionController extends Controller
                 $q->where('description', 'like', "%{$search}%")
                     ->orWhereHas('category', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('account', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
                     });
             });
         }

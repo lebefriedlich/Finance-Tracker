@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
         // FCM Token
+        Route::get('/fcm-token', [DeviceTokenController::class, 'show']);
         Route::post('/fcm-token', [DeviceTokenController::class, 'store']);
         Route::delete('/fcm-token', [DeviceTokenController::class, 'destroy']);
 

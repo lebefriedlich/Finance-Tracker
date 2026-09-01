@@ -18,14 +18,14 @@ trait DateRangeFilter
         if ($cycleStart > 15) {
             // Cycle M starts at (M-1)-day and ends at M-(day-1)
             if ($today->day >= $cycleStart) {
-                return $today->copy()->addMonth()->format('Y-m');
+                return $today->copy()->addMonthNoOverflow()->format('Y-m');
             } else {
                 return $today->format('Y-m');
             }
         } else {
             // Cycle M starts at M-day and ends at (M+1)-(day-1)
             if ($today->day < $cycleStart) {
-                return $today->copy()->subMonth()->format('Y-m');
+                return $today->copy()->subMonthNoOverflow()->format('Y-m');
             } else {
                 return $today->format('Y-m');
             }
@@ -44,20 +44,25 @@ trait DateRangeFilter
         }
 
         // Otherwise use month and cycle_start_date
-        $month = $request->input('month', $this->getDefaultMonth());
+        $month = $request->input('month');
+        if ($month === 'all') {
+            return [null, null];
+        }
+        $month = $month ?: $this->getDefaultMonth();
         $cycleStart = $user->cycle_start_date ?? 1;
 
-        $date = Carbon::createFromFormat('Y-m', $month);
+        $date = Carbon::createFromFormat('Y-m-d', $month . '-01');
 
         if ($cycleStart > 15) {
-            $startDate = $date->copy()->subMonth()->day($cycleStart)->startOfDay();
+            $startDate = $date->copy()->subMonthNoOverflow()->day($cycleStart)->startOfDay();
         } else {
             $startDate = $date->copy()->day($cycleStart)->startOfDay();
         }
 
         // End date is one month later minus one day
-        $endDate = $startDate->copy()->addMonth()->subDay()->endOfDay();
+        $endDate = $startDate->copy()->addMonthNoOverflow()->subDay()->endOfDay();
 
         return [$startDate, $endDate];
     }
 }
+

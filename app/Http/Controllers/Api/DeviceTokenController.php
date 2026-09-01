@@ -13,7 +13,7 @@ class DeviceTokenController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'fcm_token' => 'required|string',
+            "fcm_token" => "required|string",
         ]);
 
         $user = $request->user();
@@ -21,8 +21,8 @@ class DeviceTokenController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'FCM Token updated successfully',
+            "status" => "success",
+            "message" => "FCM Token updated successfully",
         ]);
     }
 
@@ -36,8 +36,23 @@ class DeviceTokenController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'FCM Token removed successfully',
+            "status" => "success",
+            "message" => "FCM Token removed successfully",
+        ]);
+    }
+
+    /**
+     * Show the user's current FCM token.
+     */
+    public function show(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            "status" => "success",
+            "data" => [
+                "fcm_token" => $user->fcm_token
+            ]
         ]);
     }
 }

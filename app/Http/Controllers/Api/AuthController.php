@@ -27,7 +27,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $expiresAt = $request->boolean('remember') ? null : now()->addHours(24);
+        $expiresAt = null;
 
         return response()->json([
             'status' => 'success',
