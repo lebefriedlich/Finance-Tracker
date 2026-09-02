@@ -26,7 +26,7 @@ class TransactionController extends Controller
 
         $cacheKey = "transactions_user_{$userId}_p_{$page}_s_{$searchStr}_d1_{$startDateStr}_d2_{$endDateStr}_v_{$version}";
 
-        $responseData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60 * 24, function () use ($request, $startDate, $endDate, $search, $month) {
+        $responseData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60 * 24, function () use ($request, $startDate, $endDate, $search, $month, $page) {
             $query = $request->user()->transactions()->with(['category', 'account']);
 
             if ($startDate) $query->whereDate('date', '>=', $startDate);
