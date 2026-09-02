@@ -11,10 +11,7 @@ class BudgetController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
-        $budgets = Cache::rememberForever('budgets_user_' . $userId, function () use ($request) {
-            return $request->user()->budgets()->with('category')->get();
-        });
+        $budgets = $request->user()->budgets()->with('category')->get();
 
         return response()->json([
             'status' => 'success',

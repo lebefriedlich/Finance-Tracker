@@ -17,78 +17,67 @@ class TransactionController extends Controller
         $search = $request->input('search');
         $page = $request->input('page', 1);
         $month = $request->input('month', $this->getDefaultMonth());
-        $userId = $request->user()->id;
+        $query = $request->user()->transactions()->with(['category', 'account']);
 
-        $version = \Illuminate\Support\Facades\Cache::get('dashboard_version_user_' . $userId, 1);
-        $startDateStr = $startDate ? $startDate->toDateString() : 'null';
-        $endDateStr = $endDate ? $endDate->toDateString() : 'null';
-        $searchStr = $search ? md5($search) : 'none';
+        if ($startDate) $query->whereDate('date', '>=', $startDate);
+        if ($endDate) $query->whereDate('date', '<=', $endDate);
 
-        $cacheKey = "transactions_user_{$userId}_p_{$page}_s_{$searchStr}_d1_{$startDateStr}_d2_{$endDateStr}_v_{$version}";
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('account', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
 
-        $responseData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60 * 24, function () use ($request, $startDate, $endDate, $search, $month, $page) {
-            $query = $request->user()->transactions()->with(['category', 'account']);
+        $datesQuery = clone $query;
+        $datesQuery->setEagerLoads([]);
 
-            if ($startDate) $query->whereDate('date', '>=', $startDate);
-            if ($endDate) $query->whereDate('date', '<=', $endDate);
+        // 1. Hitung total "tanggal unik" secara eksplisit
+        $totalDates = (clone $datesQuery)
+            ->distinct()
+            ->count(DB::raw('DATE(date)'));
 
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('description', 'like', "%{$search}%")
-                        ->orWhereHas('category', function ($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%");
-                        })
-                        ->orWhereHas('account', function ($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%");
-                        });
-                });
-            }
+        // 2. Ambil tanggal untuk halaman saat ini secara manual menggunakan limit & offset
+        $dates = $datesQuery->select(DB::raw('DATE(date) as date_group'))
+            ->distinct()
+            ->orderBy('date_group', 'desc')
+            ->offset(($page - 1) * 7)
+            ->limit(7)
+            ->get();
 
-            $datesQuery = clone $query;
-            $datesQuery->setEagerLoads([]);
+        // 3. Buat objek Paginator manual
+        $datesPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $dates, 
+            $totalDates, 
+            7, 
+            $page, 
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
-            // 1. Hitung total "tanggal unik" secara eksplisit
-            $totalDates = (clone $datesQuery)
-                ->distinct()
-                ->count(DB::raw('DATE(date)'));
+        // 4. Ambil transaksinya untuk tanggal-tanggal yang didapat
+        $transactions = $query->whereIn(DB::raw('DATE(date)'), $dates->pluck('date_group'))
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
 
-            // 2. Ambil tanggal untuk halaman saat ini secara manual menggunakan limit & offset
-            $dates = $datesQuery->select(DB::raw('DATE(date) as date_group'))
-                ->distinct()
-                ->orderBy('date_group', 'desc')
-                ->offset(($page - 1) * 7)
-                ->limit(7)
-                ->get();
+        // 5. Masukkan kumpulan transaksi ke paginator
+        $datesPaginator->setCollection($transactions);
 
-            // 3. Buat objek Paginator manual
-            $datesPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
-                $dates, 
-                $totalDates, 
-                7, 
-                $page, 
-                ['path' => request()->url(), 'query' => request()->query()]
-            );
-
-            // 4. Ambil transaksinya untuk tanggal-tanggal yang didapat
-            $transactions = $query->whereIn(DB::raw('DATE(date)'), $dates->pluck('date_group'))
-                ->orderBy('date', 'desc')
-                ->orderBy('id', 'desc')
-                ->get();
-
-            // 5. Masukkan kumpulan transaksi ke paginator
-            $datesPaginator->setCollection($transactions);
-
-            return [
-                'status' => 'success',
-                'data' => $datesPaginator,
-                'filters' => [
-                    'month' => $month,
-                    'start_date' => $request->input('start_date'),
-                    'end_date' => $request->input('end_date'),
-                    'search' => $search
-                ]
-            ];
-        });
+        $responseData = [
+            'status' => 'success',
+            'data' => $datesPaginator,
+            'filters' => [
+                'month' => $month,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'search' => $search
+            ]
+        ];
 
         return response()->json($responseData, 200);
     }

@@ -16,77 +16,66 @@ class DashboardController extends Controller
         [$startDate, $endDate] = $this->getDateRange($request);
         $month = $request->input('month', $this->getDefaultMonth());
 
-        $userId = $user->id;
-        $version = Cache::get('dashboard_version_user_' . $userId, 1);
-        $startDateStr = $startDate ? $startDate->toDateString() : 'null';
-        $endDateStr = $endDate ? $endDate->toDateString() : 'null';
+        $totalBalance = $user->accounts()->sum('balance');
+
+        $query = $user->transactions();
+        if ($startDate) $query->whereDate('date', '>=', $startDate);
+        if ($endDate) $query->whereDate('date', '<=', $endDate);
         
-        $cacheKey = "dashboard_user_{$userId}_m_{$month}_s_{$startDateStr}_e_{$endDateStr}_v_{$version}";
+        $monthlyTransactions = $query->get();
 
-        $dashboardData = Cache::remember($cacheKey, 60 * 24, function () use ($user, $startDate, $endDate, $month) {
-            $totalBalance = $user->accounts()->sum('balance');
+        $monthlyIncome = $monthlyTransactions->where('type', 'income')->sum('amount');
+        $monthlyExpense = $monthlyTransactions->where('type', 'expense')->sum('amount');
 
-            $query = $user->transactions();
-            if ($startDate) $query->whereDate('date', '>=', $startDate);
-            if ($endDate) $query->whereDate('date', '<=', $endDate);
+        // Categories with budget vs actual for this month
+        if ($month === 'all') {
+            $budgets = $user->budgets()->selectRaw('category_id, sum(amount) as amount')->groupBy('category_id')->get()->keyBy('category_id');
+        } else {
+            $budgets = $user->budgets()->where('month', $month)->get()->keyBy('category_id');
+        }
+        $categoryExpenses = $monthlyTransactions->where('type', 'expense')->groupBy('category_id');
+
+        $budgetProgress = $user->categories()->where('type', 'expense')->get()->map(function ($cat) use ($budgets, $categoryExpenses) {
+            $budgetAmount = $budgets->has($cat->id) ? $budgets[$cat->id]->amount : 0;
+            $spentAmount = $categoryExpenses->has($cat->id) ? $categoryExpenses[$cat->id]->sum('amount') : 0;
             
-            $monthlyTransactions = $query->get();
-
-            $monthlyIncome = $monthlyTransactions->where('type', 'income')->sum('amount');
-            $monthlyExpense = $monthlyTransactions->where('type', 'expense')->sum('amount');
-
-            // Categories with budget vs actual for this month
-            if ($month === 'all') {
-                $budgets = $user->budgets()->selectRaw('category_id, sum(amount) as amount')->groupBy('category_id')->get()->keyBy('category_id');
-            } else {
-                $budgets = $user->budgets()->where('month', $month)->get()->keyBy('category_id');
-            }
-            $categoryExpenses = $monthlyTransactions->where('type', 'expense')->groupBy('category_id');
-
-            $budgetProgress = $user->categories()->where('type', 'expense')->get()->map(function ($cat) use ($budgets, $categoryExpenses) {
-                $budgetAmount = $budgets->has($cat->id) ? $budgets[$cat->id]->amount : 0;
-                $spentAmount = $categoryExpenses->has($cat->id) ? $categoryExpenses[$cat->id]->sum('amount') : 0;
-                
-                $status = 'safe';
-                if ($budgetAmount == 0) $status = 'nobudget';
-                elseif ($spentAmount > $budgetAmount) $status = 'over';
-                elseif ($spentAmount == $budgetAmount) $status = 'empty';
-                elseif ($spentAmount >= 0.8 * $budgetAmount) $status = 'warning';
-
-                return [
-                    'id' => $cat->id,
-                    'name' => $cat->name,
-                    'budget' => $budgetAmount,
-                    'spent' => $spentAmount,
-                    'status' => $status,
-                ];
-            })->filter(function ($bp) {
-                return $bp['budget'] > 0;
-            })->values();
-
-            $recentTransactions = $user->transactions()
-                ->with('category')
-                ->when($startDate, fn($q) => $q->whereDate('date', '>=', $startDate))
-                ->when($endDate, fn($q) => $q->whereDate('date', '<=', $endDate))
-                ->orderBy('date', 'desc')
-                ->take(10)
-                ->get();
-
-            $unreadNotificationsCount = $user->unreadNotifications()->count();
+            $status = 'safe';
+            if ($budgetAmount == 0) $status = 'nobudget';
+            elseif ($spentAmount > $budgetAmount) $status = 'over';
+            elseif ($spentAmount == $budgetAmount) $status = 'empty';
+            elseif ($spentAmount >= 0.8 * $budgetAmount) $status = 'warning';
 
             return [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'budget' => $budgetAmount,
+                'spent' => $spentAmount,
+                'status' => $status,
+            ];
+        })->filter(function ($bp) {
+            return $bp['budget'] > 0;
+        })->values();
+
+        $recentTransactions = $user->transactions()
+            ->with('category')
+            ->when($startDate, fn($q) => $q->whereDate('date', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->whereDate('date', '<=', $endDate))
+            ->orderBy('date', 'desc')
+            ->take(10)
+            ->get();
+
+        $unreadNotificationsCount = $user->unreadNotifications()->count();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
                 'totalBalance' => $totalBalance,
                 'monthlyIncome' => $monthlyIncome,
                 'monthlyExpense' => $monthlyExpense,
                 'budgetProgress' => $budgetProgress,
                 'recentTransactions' => $recentTransactions,
                 'unreadNotificationsCount' => $unreadNotificationsCount
-            ];
-        });
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $dashboardData
+            ]
         ]);
     }
 }

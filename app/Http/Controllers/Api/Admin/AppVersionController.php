@@ -11,9 +11,7 @@ class AppVersionController extends Controller
 {
     public function index()
     {
-        $versions = Cache::rememberForever('app_versions_index', function () {
-            return AppVersion::orderBy('id', 'desc')->get();
-        });
+        $versions = AppVersion::orderBy('id', 'desc')->get();
         return response()->json([
             'message' => 'Version list',
             'data' => $versions
@@ -31,8 +29,6 @@ class AppVersionController extends Controller
         ]);
 
         $version = AppVersion::create($validated);
-        
-        $this->clearCache();
 
         return response()->json([
             'message' => 'Version created successfully',
@@ -59,8 +55,6 @@ class AppVersionController extends Controller
         ]);
 
         $appVersion->update($validated);
-        
-        $this->clearCache();
 
         return response()->json([
             'message' => 'Version updated successfully',
@@ -71,8 +65,6 @@ class AppVersionController extends Controller
     public function destroy(AppVersion $appVersion)
     {
         $appVersion->delete();
-        
-        $this->clearCache();
 
         return response()->json([
             'message' => 'Version deleted successfully'
@@ -81,9 +73,7 @@ class AppVersionController extends Controller
 
     public function latest()
     {
-        $latest = Cache::rememberForever('app_versions_latest', function () {
-            return AppVersion::orderBy('build_number', 'desc')->first();
-        });
+        $latest = AppVersion::orderBy('build_number', 'desc')->first();
 
         if (!$latest) {
             return response()->json([
@@ -93,10 +83,4 @@ class AppVersionController extends Controller
         return response()->json($latest);
     }
 
-    private function clearCache()
-    {
-        Cache::forget('app_versions_index');
-        Cache::forget('app_versions_latest');
-    }
 }
-

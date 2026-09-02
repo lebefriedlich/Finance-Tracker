@@ -14,10 +14,7 @@ class AccountController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
-        $accounts = Cache::rememberForever('accounts_user_' . $userId, function () use ($request) {
-            return $request->user()->accounts()->orderBy('name')->get();
-        });
+        $accounts = $request->user()->accounts()->orderBy('name')->get();
 
         return response()->json([
             'status' => 'success',

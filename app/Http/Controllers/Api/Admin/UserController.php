@@ -13,9 +13,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = Cache::rememberForever('users_index', function () {
-            return User::where('role', '!=', 'owner')->latest()->get();
-        });
+        $users = User::where('role', '!=', 'owner')->latest()->get();
 
         return response()->json([
             'status' => 'success',
@@ -40,7 +38,6 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
-        $this->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -76,7 +73,6 @@ class UserController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        $this->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -96,7 +92,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        $this->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -104,8 +99,4 @@ class UserController extends Controller
         ]);
     }
 
-    private function clearCache()
-    {
-        Cache::forget('users_index');
-    }
 }

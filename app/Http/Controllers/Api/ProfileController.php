@@ -28,8 +28,6 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
-        $this->clearCache($user->id);
-
         return response()->json([
             'status' => 'success',
             'message' => 'Profile successfully updated',
@@ -62,8 +60,6 @@ class ProfileController extends Controller
 
         $request->user()->update($validated);
 
-        $this->clearCache($request->user()->id);
-
         return response()->json([
             'status' => 'success',
             'message' => 'Cycle date successfully updated',
@@ -71,9 +67,4 @@ class ProfileController extends Controller
         ]);
     }
 
-    private function clearCache($userId)
-    {
-        Cache::forget('users_index');
-        Cache::increment('dashboard_version_user_' . $userId);
-    }
 }
