@@ -48,6 +48,8 @@ class NotificationController extends Controller
             $user->unreadNotifications->markAsRead();
         }
 
+        \Illuminate\Support\Facades\Cache::increment('dashboard_version_user_' . $user->id);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Notification(s) marked as read'

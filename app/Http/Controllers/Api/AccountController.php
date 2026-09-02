@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AccountController extends Controller
 {
@@ -13,7 +14,10 @@ class AccountController extends Controller
      */
     public function index(Request $request)
     {
-        $accounts = $request->user()->accounts()->orderBy('name')->get();
+        $userId = $request->user()->id;
+        $accounts = Cache::rememberForever('accounts_user_' . $userId, function () use ($request) {
+            return $request->user()->accounts()->orderBy('name')->get();
+        });
 
         return response()->json([
             'status' => 'success',

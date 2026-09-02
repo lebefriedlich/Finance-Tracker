@@ -5,14 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Budget;
+use Illuminate\Support\Facades\Cache;
 
 class BudgetController extends Controller
 {
     public function index(Request $request)
     {
+        $userId = $request->user()->id;
+        $budgets = Cache::rememberForever('budgets_user_' . $userId, function () use ($request) {
+            return $request->user()->budgets()->with('category')->get();
+        });
+
         return response()->json([
             'status' => 'success',
-            'data' => $request->user()->budgets()->with('category')->get()
+            'data' => $budgets
         ]);
     }
 

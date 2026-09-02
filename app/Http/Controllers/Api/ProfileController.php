@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class ProfileController extends Controller
 {
@@ -26,6 +27,8 @@ class ProfileController extends Controller
         ]);
 
         $user->update($validated);
+
+        $this->clearCache($user->id);
 
         return response()->json([
             'status' => 'success',
@@ -59,10 +62,18 @@ class ProfileController extends Controller
 
         $request->user()->update($validated);
 
+        $this->clearCache($request->user()->id);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Cycle date successfully updated',
             'data' => $request->user()
         ]);
+    }
+
+    private function clearCache($userId)
+    {
+        Cache::forget('users_index');
+        Cache::increment('dashboard_version_user_' . $userId);
     }
 }

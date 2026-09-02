@@ -7,15 +7,20 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
     public function index()
     {
+        $users = Cache::rememberForever('users_index', function () {
+            return User::where('role', '!=', 'owner')->latest()->get();
+        });
+
         return response()->json([
             'status' => 'success',
             'message' => 'User data retrieved successfully',
-            'data' => User::where('role', '!=', 'owner')->latest()->get()
+            'data' => $users
         ]);
     }
 
@@ -34,6 +39,8 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);
+
+        $this->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -69,6 +76,8 @@ class UserController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
+        $this->clearCache();
+
         return response()->json([
             'status' => 'success',
             'message' => 'User updated successfully',
@@ -87,9 +96,16 @@ class UserController extends Controller
 
         $user->delete();
 
+        $this->clearCache();
+
         return response()->json([
             'status' => 'success',
             'message' => 'User deleted successfully'
         ]);
+    }
+
+    private function clearCache()
+    {
+        Cache::forget('users_index');
     }
 }

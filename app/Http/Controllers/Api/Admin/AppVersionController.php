@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppVersion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AppVersionController extends Controller
 {
     public function index()
     {
-        $versions = AppVersion::orderBy('id', 'desc')->get();
+        $versions = Cache::rememberForever('app_versions_index', function () {
+            return AppVersion::orderBy('id', 'desc')->get();
+        });
         return response()->json([
             'message' => 'Version list',
             'data' => $versions
@@ -28,6 +31,9 @@ class AppVersionController extends Controller
         ]);
 
         $version = AppVersion::create($validated);
+        
+        $this->clearCache();
+
         return response()->json([
             'message' => 'Version created successfully',
             'data' => $version
@@ -53,6 +59,9 @@ class AppVersionController extends Controller
         ]);
 
         $appVersion->update($validated);
+        
+        $this->clearCache();
+
         return response()->json([
             'message' => 'Version updated successfully',
             'data' => $appVersion
@@ -62,6 +71,9 @@ class AppVersionController extends Controller
     public function destroy(AppVersion $appVersion)
     {
         $appVersion->delete();
+        
+        $this->clearCache();
+
         return response()->json([
             'message' => 'Version deleted successfully'
         ]);
@@ -69,7 +81,10 @@ class AppVersionController extends Controller
 
     public function latest()
     {
-        $latest = AppVersion::orderBy('build_number', 'desc')->first();
+        $latest = Cache::rememberForever('app_versions_latest', function () {
+            return AppVersion::orderBy('build_number', 'desc')->first();
+        });
+
         if (!$latest) {
             return response()->json([
                 'message' => 'No versions found'
@@ -77,4 +92,11 @@ class AppVersionController extends Controller
         }
         return response()->json($latest);
     }
+
+    private function clearCache()
+    {
+        Cache::forget('app_versions_index');
+        Cache::forget('app_versions_latest');
+    }
 }
+

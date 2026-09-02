@@ -5,14 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
     public function index(Request $request)
     {
+        $userId = $request->user()->id;
+        $categories = Cache::rememberForever('categories_user_' . $userId, function () use ($request) {
+            return $request->user()->categories;
+        });
+
         return response()->json([
             'status' => 'success',
-            'data' => $request->user()->categories
+            'data' => $categories
         ]);
     }
 
@@ -24,6 +30,8 @@ class CategoryController extends Controller
         ]);
 
         $category = $request->user()->categories()->create($validated);
+
+        $this->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -57,6 +65,8 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
+        $this->clearCache();
+
         return response()->json([
             'status' => 'success',
             'message' => 'Category successfully updated',
@@ -72,9 +82,18 @@ class CategoryController extends Controller
 
         $category->delete();
 
+        $this->clearCache();
+
         return response()->json([
             'status' => 'success',
             'message' => 'Category successfully deleted'
         ]);
+    }
+
+    private function clearCache()
+    {
+        $userId = auth()->id();
+        Cache::forget('categories_user_' . $userId);
+        Cache::increment('dashboard_version_user_' . $userId);
     }
 }
