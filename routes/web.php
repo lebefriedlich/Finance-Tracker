@@ -9,6 +9,19 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/apk/latest', function () {
+    // Ambil versi terbaru berdasarkan build_number dari database
+    $latestApp = \App\Models\AppVersion::orderBy('build_number', 'desc')->first();
+
+    // Jika belum ada data versi di database atau url kosong
+    if (!$latestApp || !$latestApp->download_url) {
+        abort(404, 'File APK belum tersedia.');
+    }
+
+    // Redirect pengguna langsung ke URL download tersebut
+    return redirect($latestApp->download_url);
+});
+
 Route::middleware(['auth'])->group(function () {
     // Shared profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
